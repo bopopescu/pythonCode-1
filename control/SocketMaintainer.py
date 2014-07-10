@@ -27,5 +27,10 @@ class SocketMaintainer(object):
         '''
         self.__connectedClients[connectionID] = handler
         
-         
+        
+    def clientDisconnected (self, connectionID):
+        '''
+        Function Called when a client disconnected
+        ''' 
+        del (self.__connectedClients[connectionID])
         
