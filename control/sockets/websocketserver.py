@@ -58,13 +58,6 @@ class WebSocketsHandler(SocketServer.StreamRequestHandler):
         response += 'Connection: Upgrade\r\n'
         response += 'Sec-WebSocket-Accept: %s\r\n\r\n' % digest
         self.handshake_done = self.request.send(response)
-        
-        self.send_message("Hello World my little Client")
 
     def on_message(self, message):
         print message
-
-if __name__ == "__main__":
-    server = SocketServer.TCPServer(
-        ("localhost", 9999), WebSocketsHandler)
-    server.serve_forever()
