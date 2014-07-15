@@ -31,7 +31,7 @@ class Calculation:
         """
         flugbahn = self.__calc_flugbahn(source, angle, speed)
         hit_horizon_pos = self.__calc_horizon_hit_pos(flugbahn)
-        hit_player = self.__calc_target_hit(flugbahn)
+        hit_player = self.__calc_target_hit(flugbahn, self.__player_positions[target])
 
         if hit_player is None:
             return Hit(hit_horizon_pos.x, hit_horizon_pos.y, 0)
@@ -101,14 +101,14 @@ class Calculation:
 
     def __calc_flugbahn(self, source, angle, speed):
         result = []
-        y_offset = self.__player_positions[source]
-        w = self.__width
+        source_pos = self.__player_positions[source]
+        w = self.__width - source_pos.x
 
         for x in xrange(w):
-            result.append(y_offset + self.__calc_y(x, angle, speed))
+            result.append(source_pos.y + self.__calc_y(x, angle, speed))
 
         return result
 
     def __calc_y(self, x, angle, speed):
-        return x * math.tan(angle) - (math.g * x^2)/(2* speed^2 * math.cos(angle)^2) # ohne Berücksichtigung Luftwiderstand
+        return x * math.tan(angle) - (Consts.g * math.pow(x,2))/(2* math.pow(speed,2) * math.pow(math.cos(angle),2)) # ohne Berücksichtigung Luftwiderstand
 

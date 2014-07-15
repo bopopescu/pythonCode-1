@@ -1,12 +1,10 @@
 # coding=utf-8
-from _ast import Dict
-
 __author__ = 'M'
 
-from model.match import Match
 import random
-import math
-from random import shuffle
+
+from model.match import Match
+from utils.gameconsts import Consts
 
 class MatchBuilder:
 
@@ -33,7 +31,7 @@ class MatchBuilder:
         # etwas übertrieben kompliziert, evtl. können mehr als 2 Player spielen?
         parts_width = float(world_width) / (len(players) + 1)
         for i in xrange(len(players)):
-            if (i <= len(players) / 2):
+            if (i < len(players) / 2):
                 result.append(int(round(i * parts_width + (parts_width * random.random()))))
             else:
                 result.append(int(round((i + 1) * parts_width + (parts_width * random.random()))))
@@ -41,9 +39,10 @@ class MatchBuilder:
         return result
 
     @staticmethod
-    def get_match(players, world_width):
+    def get_match(players):
         """
         Erstellt ein neues Match
         :rtype : Match
         """
+        world_width = Consts.WORLD_WIDTH
         return Match(players, world_width, MatchBuilder.__get_new_horizon(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))

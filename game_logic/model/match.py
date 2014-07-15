@@ -32,8 +32,10 @@ class Match:
     def calcHit(self, source, angle, speed):
         #TODO Rückgabe: Treffer, Treffer%, Flugbahn
         for player in self.__players:
-            if not player is source
-        return self.__calculation.calcHit(source, target, angle, speed)
+            # TODO: für mehrere Ziele anpassen
+            # berechnet z.Zt. nur für erstes Ziel
+            if not player is source:
+                return self.__calculation.calcHit(source, player, angle, speed)
 
     @property
     def players(self):
