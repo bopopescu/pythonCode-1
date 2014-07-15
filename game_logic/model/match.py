@@ -1,34 +1,52 @@
+# coding=utf-8
 __author__ = 'M'
-from player import Player
-import matplotlib.pyplot as plt
+
+from ..utils.classes import Point
+from ..calculation.calculation import Calculation
+
+#import matplotlib.pyplot as plt
 
 class Match:
-    dbID = 0
-    __players = []
-    __activePlayer = None
-    __horizon = []
+    # dbID = 0
+    # __players = []
+    # __activePlayer = None
+    # __horizon = []
+    # __player_positions = []
 
-    def __init__(self, players):
-        """
+    def __init__(self, players, world_width, horizon, player_x_positions):
+        #TODO: DB-Werte holen / setzen ?
 
-        :param players: Player[]
-        """
-        #TODO: DB-Werte holen / setzen
-        self.players = players
-        self.__activePlayer = players[0]
+        self.__players = players
+        self.__activePlayer = players[0] # erster Spieler beginnt
+        self.__horizon = horizon
+        self.__world_width = world_width
+        self.__player_positions = dict()
 
-    def getPlayers(self):
+        # Spielerpositionen ermitteln und eintragen
+        for i in xrange(len(players)):
+            x = player_x_positions[i]
+            self.__player_positions[players[i]] = Point(x, horizon[x])
+
+        self.__calculation = Calculation(world_width, horizon, self.__player_positions)
+
+    def calcHit(self, source, angle, speed):
+        #TODO Rückgabe: Treffer, Treffer%, Flugbahn
+        for player in self.__players:
+            if not player is source
+        return self.__calculation.calcHit(source, target, angle, speed)
+
+    @property
+    def players(self):
         return self.__players
 
-    def getActivePlayer(self):
+    @property
+    def activePlayer(self):
         return self.__activePlayer
 
-    def setActivePlayer(self, active_player):
-        """
-
-        :type active_player: Player
-        """
+    @activePlayer.setter
+    def activePlayer(self, active_player):
         self.__activePlayer = active_player
 
-    def getHorizon(self):
+    @property
+    def horizon(self):
         return self.__horizon

@@ -1,16 +1,13 @@
+# coding=utf-8
 __author__ = 'M'
-from match import Match
+import match
 
 class Player:
-    dbID = 0
-    sessionID = 0
-    __match = None
 
-    def __init__(self):
+    def __init__(self, db_id, session_id):
         #TODO Player / Match DB-Werte holen / setzen
-        self.dbID = 0
-        self.__match = None
-        self.sessionID = 0
+        self.__dbID = db_id
+        self.__sessionID = session_id
 
     def getMatch(self):
         return self.__match
