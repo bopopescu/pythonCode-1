@@ -1,8 +1,10 @@
 # coding=utf-8
 __author__ = 'M'
 
-from ..utils.classes import Point
+from game_logic.utils.classes import Point
 from ..calculation.calculation import Calculation
+import time
+import random
 
 #import matplotlib.pyplot as plt
 
@@ -21,6 +23,7 @@ class Match:
         self.__horizon = horizon
         self.__world_width = world_width
         self.__player_positions = dict()
+        self.__matchId = "%f_%s" % (time.time(), random.randint(0,99999))
 
         # Spielerpositionen ermitteln und eintragen
         for i in xrange(len(players)):
@@ -28,12 +31,13 @@ class Match:
             self.__player_positions[players[i]] = Point(x, horizon[x])
 
         self.__calculation = Calculation(world_width, horizon, self.__player_positions)
-
-    def calcHit(self, source, angle, speed):
-        #TODO Rückgabe: Treffer, Treffer%, Flugbahn
-        for player in self.__players:
-            if not player is source
-        return self.__calculation.calcHit(source, target, angle, speed)
+    
+    #TODO: Remove comments
+    #def calcHit(self, source, angle, speed):
+        #TODO R��ckgabe: Treffer, Treffer%, Flugbahn
+        #for player in self.__players:
+            #if not player is source
+            #return self.__calculation.calcHit(source, target, angle, speed)
 
     @property
     def players(self):
@@ -50,3 +54,9 @@ class Match:
     @property
     def horizon(self):
         return self.__horizon
+    
+    def getMatchId (self):
+        return self.__matchId
+    
+    def getPlayerPostion (self, player):
+        return self.__player_positions[player]
