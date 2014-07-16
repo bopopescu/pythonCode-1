@@ -32,9 +32,9 @@ class MatchBuilder:
         parts_width = float(world_width) / (len(players) + 1)
         for i in xrange(len(players)):
             if (i < len(players) / 2):
-                result.append(int(round(i * parts_width + (parts_width * random.random()))))
+                result.append(int(max(round(i * parts_width + (parts_width * random.random()))-1,0)))
             else:
-                result.append(int(round((i + 1) * parts_width + (parts_width * random.random()))))
+                result.append(int(max(round((i + 1) * parts_width + (parts_width * random.random()))-1,0)))
 
         return result
 

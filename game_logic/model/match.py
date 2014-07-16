@@ -1,6 +1,8 @@
 # coding=utf-8
 __author__ = 'M'
 
+import json
+
 from ..utils.classes import Point
 from ..calculation.calculation import Calculation
 
@@ -25,9 +27,23 @@ class Match:
         # Spielerpositionen ermitteln und eintragen
         for i in xrange(len(players)):
             x = player_x_positions[i]
+            print(x)
             self.__player_positions[players[i]] = Point(x, horizon[x])
 
         self.__calculation = Calculation(world_width, horizon, self.__player_positions)
+
+    @property
+    def calculation(self):
+        return  self.__calculation
+
+    def __str__(self):
+        result = ''
+        for player, pos in self.__player_positions.items():
+            if len(result) > 0:
+                result = result +'\n'
+            result += player.__str__() + ': ' + pos.__str__()
+
+        return result
 
     def calcHit(self, source, angle, speed):
         #TODO Rückgabe: Treffer, Treffer%, Flugbahn

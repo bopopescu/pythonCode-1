@@ -9,6 +9,9 @@ class Player:
         self.__dbID = db_id
         self.__sessionID = session_id
 
+    def __str__(self):
+        return 'Player session_id={:n}'.format(self.__sessionID)
+
     def getMatch(self):
         return self.__match
 

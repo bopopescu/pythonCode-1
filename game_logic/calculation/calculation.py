@@ -29,12 +29,16 @@ class Calculation:
             None: nichts getroffen - bleibt in der Luft?
             Hit: Treffer Horizontlinie (percent = 0) oder Target (percent > 0)
         """
-        flugbahn = self.__calc_flugbahn(source, angle, speed)
+        source_pos = self.__player_positions[source]
+        flugbahn = self.__calc_flugbahn(source_pos, angle, speed)
         hit_horizon_pos = self.__calc_horizon_hit_pos(flugbahn)
         hit_player = self.__calc_target_hit(flugbahn, self.__player_positions[target])
 
         if hit_player is None:
-            return Hit(hit_horizon_pos.x, hit_horizon_pos.y, 0)
+            if hit_horizon_pos:
+                return Hit(hit_horizon_pos.x, hit_horizon_pos.y, 0)
+            else:
+                return None
         else:
             return hit_player
 
@@ -46,17 +50,20 @@ class Calculation:
         :return:
         """
         result = 0
-        flugbahn = self.__calc_flugbahn(source, angle, speed)
+        source_pos = self.__player_positions[source]
+        flugbahn = self.__calc_flugbahn(source_pos, angle, speed)
 
-        for y in flugbahn:
-            result = max(result, y)
+        for point in flugbahn:
+            result = max(result, point.y)
 
         return result
 
     def __calc_horizon_hit_pos(self, flugbahn):
-        for x in xrange(self.__width):
-            if flugbahn[x] <= self.__horizon[x]:
-                return Point(x, flugbahn[x])
+        for point in flugbahn:
+            last_point = point
+            if not point is flugbahn[0]:
+                if point.y - Consts.BULLET_RADIUS < self.__horizon[point.x]:
+                    return Point(last_point.x, self.__horizon[point.x])
         return None
 
     def __calc_target_hit_percent(self, target_pos, bullet_pos):
@@ -64,7 +71,7 @@ class Calculation:
         distance = Point(target_pos.x - bullet_pos.x, target_pos.y - bullet_pos.y)
 
         # kürzesten Abstand zwischen Ziel und Geschossmittelpunkt mit Pytagoras ermitteln
-        distanceValue = math.sqrt(distance.x^2 + distance.y^2)
+        distanceValue = math.sqrt(math.pow(distance.x,2) + math.pow(distance.y,2))
 
         # Überdeckung der Kreisradien als Maß für Treffer-% ermitteln
         # ggf. Flächeninhalt der Überdeckung als genaueres Treffermaß berechnen
@@ -82,16 +89,16 @@ class Calculation:
         # Rechteck um Ziel festlegen
         target_rect = Rect(Point(target_pos.x - Consts.PLAYER_RADIUS, target_pos.y - Consts.PLAYER_RADIUS),
                            Point(target_pos.x + Consts.PLAYER_RADIUS, target_pos.y + Consts.PLAYER_RADIUS))
-        for x in xrange(self.__width):
+        for point in flugbahn:
             # zuerst grob prüfen, ob Zielrechteck getroffen wurde
-            if x > target_rect.topLeft.x and x <= target_rect.bottomRight.x and \
-                flugbahn[x] >= target_rect.topLeft.y and flugbahn[x] <= target_rect.bottomRight.y:
+            if point.x > target_rect.topLeft.x and point.x <= target_rect.bottomRight.x and \
+                point.y >= target_rect.topLeft.y and point.y <= target_rect.bottomRight.y:
                 # X und Y des Geschosses im Zielrechteck, Treffer anhand der Umkreise genauer prüfen
                 # Maximalwert zurückgeben
-                hitPercent = self.__calc_target_hit_percent(Point(x, flugbahn[x]))
+                hitPercent = self.__calc_target_hit_percent(target_pos, point)
                 if result.percent < hitPercent:
-                    result.x = x
-                    result.y = flugbahn[x]
+                    result.x = point.x
+                    result.y = point.y
                     result.percent = hitPercent
 
         if result.percent > 0:
@@ -99,13 +106,12 @@ class Calculation:
         else:
             return None
 
-    def __calc_flugbahn(self, source, angle, speed):
+    def __calc_flugbahn(self, source_pos, angle, speed):
         result = []
-        source_pos = self.__player_positions[source]
         w = self.__width - source_pos.x
 
         for x in xrange(w):
-            result.append(source_pos.y + self.__calc_y(x, angle, speed))
+            result.append(Point(source_pos.x + x, source_pos.y + Consts.PLAYER_RADIUS + self.__calc_y(x, angle, speed))) # Abschusshöhe. in der Mitte des Spielers?
 
         return result
 
