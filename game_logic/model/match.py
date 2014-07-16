@@ -36,12 +36,6 @@ class Match:
 
         self.__calculation = Calculation(world_width, horizon, self.__player_positions)
     
-    #TODO: Remove comments
-    #def calcHit(self, source, angle, speed):
-        #TODO R��ckgabe: Treffer, Treffer%, Flugbahn
-        #for player in self.__players:
-            #if not player is source
-            #return self.__calculation.calcHit(source, target, angle, speed)
 
     @property
     def calculation(self):

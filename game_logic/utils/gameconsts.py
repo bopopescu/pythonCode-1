@@ -3,6 +3,8 @@ __author__ = 'M'
 class Consts:
     PLAYER_RADIUS = 10
     BULLET_RADIUS = 3
+    WORLD_WIDTH = 600
+    g = 9.81
     
     
     
@@ -29,6 +31,3 @@ class Consts:
     PLAYER2 = "Player2"
     FIRED = "Fired"
     MAPHORIZON = "MapHorizon"
-        BULLET_RADIUS = 3
-    WORLD_WIDTH = 600
-    g = 9.81

@@ -8,6 +8,7 @@ class Player:
 
     def getMatchId(self):
         return self.__matchId
+    
     def __str__(self):
         return 'Player session_id={:n}'.format(self.__sessionID)
 
