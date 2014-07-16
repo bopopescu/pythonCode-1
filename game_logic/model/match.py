@@ -2,6 +2,9 @@
 __author__ = 'M'
 
 from game_logic.utils.classes import Point
+import json
+
+from ..utils.classes import Point
 from ..calculation.calculation import Calculation
 import time
 import random
@@ -28,6 +31,7 @@ class Match:
         # Spielerpositionen ermitteln und eintragen
         for i in xrange(len(players)):
             x = player_x_positions[i]
+            print(x)
             self.__player_positions[players[i]] = Point(x, horizon[x])
 
         self.__calculation = Calculation(world_width, horizon, self.__player_positions)
@@ -38,6 +42,27 @@ class Match:
         #for player in self.__players:
             #if not player is source
             #return self.__calculation.calcHit(source, target, angle, speed)
+
+    @property
+    def calculation(self):
+        return  self.__calculation
+
+    def __str__(self):
+        result = ''
+        for player, pos in self.__player_positions.items():
+            if len(result) > 0:
+                result = result +'\n'
+            result += player.__str__() + ': ' + pos.__str__()
+
+        return result
+
+    def calcHit(self, source, angle, speed):
+        #TODO Rückgabe: Treffer, Treffer%, Flugbahn
+        for player in self.__players:
+            # TODO: für mehrere Ziele anpassen
+            # berechnet z.Zt. nur für erstes Ziel
+            if not player is source:
+                return self.__calculation.calcHit(source, player, angle, speed)
 
     @property
     def players(self):

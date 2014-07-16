@@ -29,4 +29,6 @@ class Consts:
     PLAYER2 = "Player2"
     FIRED = "Fired"
     MAPHORIZON = "MapHorizon"
-    
+        BULLET_RADIUS = 3
+    WORLD_WIDTH = 600
+    g = 9.81
