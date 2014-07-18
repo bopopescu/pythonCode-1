@@ -6,17 +6,17 @@ class Player:
     def __init__(self, name):
         self.__name = name
 
-    def getMatchId(self):
-        return self.__matchId
-    
-    def __str__(self):
-        return 'Player session_id={:n}'.format(self.__sessionID)
-
-    def getMatch(self):
+    @property
+    def match(self):
         return self.__match
-
-    def setMatchId(self, matchId):
-        self.__matchId = matchId
+    
+    @match.setter
+    def match(self, match):
+        self.__match = match
         
-    def getName (self):
+    def __str__(self):
+        return 'Player ' + self.__name
+
+    @property
+    def name (self):
         return self.__name

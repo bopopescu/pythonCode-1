@@ -12,12 +12,13 @@ class Calculation:
     # __player_radius = 0
     # __player_positions = []
 
-    def __init__(self, map_width, horizon, player_positions):
+    def __init__(self, map_width, horizon, players, player_positions):
         self.__width = map_width
         self.__horizon = horizon
+        self.__players = players
         self.__player_positions = player_positions
 
-    def calcHit(self, source, target, angle, speed):
+    def calcHit(self, source, angle, speed):
         """
         Berechnet den Auftreffpunkt und die Zerstörung
         :param source: Player
@@ -29,18 +30,21 @@ class Calculation:
             None: nichts getroffen - bleibt in der Luft?
             Hit: Treffer Horizontlinie (percent = 0) oder Target (percent > 0)
         """
+        result = None
         source_pos = self.__player_positions[source]
         flugbahn = self.__calc_flugbahn(source_pos, angle, speed)
-        hit_horizon_pos = self.__calc_horizon_hit_pos(flugbahn)
-        hit_player = self.__calc_target_hit(flugbahn, self.__player_positions[target])
 
-        if hit_player is None:
-            if hit_horizon_pos:
-                return Hit(hit_horizon_pos.x, hit_horizon_pos.y, 0)
-            else:
-                return None
-        else:
-            return hit_player
+        for player in self.__players:
+            # TODO: für Treffer mehrerer Ziele anpassen?
+            # berechnet z.Zt. nur für ersten Treffer
+            result = self.__calc_target_hit(flugbahn, player)
+            if result:
+                break
+
+        if result is None:
+            result = self.__calc_horizon_hit(flugbahn)
+
+        return result
 
     def calcHorizonHeight(self, source, angle, speed):
         """
@@ -58,13 +62,17 @@ class Calculation:
 
         return result
 
-    def __calc_horizon_hit_pos(self, flugbahn):
+    def __calc_horizon_hit(self, flugbahn):
+        result = None
+
         for point in flugbahn:
             last_point = point
             if not point is flugbahn[0]:
                 if point.y - Consts.BULLET_RADIUS < self.__horizon[point.x]:
-                    return Point(last_point.x, self.__horizon[point.x])
-        return None
+                    # TODO Flugbahn.slice
+                    result = Hit(flugbahn,last_point.x, self.__horizon[point.x])
+
+        return result
 
     def __calc_target_hit_percent(self, target_pos, bullet_pos):
         # X- und Y-Abstände ermitteln
@@ -83,8 +91,9 @@ class Calculation:
         else:
             return 0
 
-    def __calc_target_hit(self, flugbahn, target_pos):
-        result = Hit(0,0,0)
+    def __calc_target_hit(self, flugbahn, target):
+        result = Hit(flugbahn,0,0,0,target)
+        target_pos = self.__player_positions[target]
 
         # Rechteck um Ziel festlegen
         target_rect = Rect(Point(target_pos.x - Consts.PLAYER_RADIUS, target_pos.y - Consts.PLAYER_RADIUS),
@@ -116,5 +125,6 @@ class Calculation:
         return result
 
     def __calc_y(self, x, angle, speed):
+        #TODO Formel prüfen!
         return x * math.tan(angle) - (Consts.g * math.pow(x,2))/(2* math.pow(speed,2) * math.pow(math.cos(angle),2)) # ohne Berücksichtigung Luftwiderstand
 

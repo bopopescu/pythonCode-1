@@ -41,8 +41,13 @@ class MatchBuilder:
     @staticmethod
     def get_match(players):
         """
-        Erstellt ein neues Match
+        Erstellt ein neues Match, setzt es für die Spieler
         :rtype : Match
         """
         world_width = Consts.WORLD_WIDTH
-        return Match(players, world_width, MatchBuilder.__get_new_horizon(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
+        match = Match(players, world_width, MatchBuilder.__get_new_horizon(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
+
+        for player in players:
+            player.match = match
+
+        return match

@@ -15,10 +15,12 @@ class Point:
         return 'x={:n}; y={:n}'.format(self.x, self.y)
 
 class Hit(Point):
-    def __init__(self, x, y, percent):
+    def __init__(self, flugbahn, x, y, percent = 0, target = None):
+        self.flugbahn = flugbahn
         self.x = x
         self.y = y
         self.percent = percent
+        self.target = target
 
     def __str__(self):
         return 'x={:n}; y={:n}, damage={:.2f}%'.format(self.x, self.y, self.percent * 100)

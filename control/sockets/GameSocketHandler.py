@@ -23,7 +23,7 @@ class GameSocketHandler(WebSocketsHandler):
         self.__socketMaintainer = SocketMaintainer()
         self.__socketID = "%f_%s" % (time.time(), random.randint(0,99999))
         self.__state = Consts.CONNECTED
-        self.__matchID = None
+        self.__match = None
         
         WebSocketsHandler.__init__(self, request, client_address, server)
     
@@ -76,11 +76,11 @@ class GameSocketHandler(WebSocketsHandler):
             self.__socketMaintainer.playerWantToPlay(self.__socketID)
             
     
-    def matchStarted (self, matchID, oponentName):
+    def matchStarted (self, match, oponentName):
         '''
         Function called, when a Match is started
         '''
-        self.__matchID = matchID
+        self.__match = match
         self.__state = Consts.GAMERUNNING
         
         self.send_message("%s(%s)" % (Consts.PLAYERAVAIBLE, oponentName))
