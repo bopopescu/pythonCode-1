@@ -31,3 +31,4 @@ class Consts:
     PLAYER2 = "Player2"
     FIRED = "Fired"
     MAPHORIZON = "MapHorizon"
+    WRONGTURN = "WrongTurn"

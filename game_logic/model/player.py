@@ -3,8 +3,9 @@ __author__ = 'M'
 
 class Player:
 
-    def __init__(self, name):
+    def __init__(self, name, socket):
         self.__name = name
+        self.__socket = socket
 
     @property
     def match(self):
@@ -20,3 +21,7 @@ class Player:
     @property
     def name (self):
         return self.__name
+    
+    @property
+    def socket (self):
+        return self.__socket

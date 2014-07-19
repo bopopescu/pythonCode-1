@@ -14,7 +14,6 @@ class SocketMaintainer(object):
     '''
     _instance = None
     __connectedClients = {}
-    __runningGames = []
     
     
     def __new__(cls, *args, **kwargs):
@@ -79,18 +78,16 @@ class SocketMaintainer(object):
         match = MatchBuilder.get_match([player1, player2]) # TODO: Handle with static constants
         
         #Inform the clients about the starting match
-        playerSockets[0].matchStarted(match, player2.name())
-        playerSockets[1].matchStarted(match, player1.name())
+        playerSockets[0].matchStarted(match, player2.name)
+        playerSockets[1].matchStarted(match, player1.name)
         
         #Send the game data
         for socket in playerSockets:
-            socket.send_message("%s(%s:[1,2,3])" % (Consts.GAMEDATA, Consts.MAPHORIZON))
-            #socket.send_message("%s(%s, %s, %s)" % (Consts.PLAYER1, player1.name(), player1SocketId, match.getPlayerPostion(player1)))
-            #socket.send_message("%s(%s, %s, %s)" % (Consts.PLAYER2, player2.name(), player2SocketId, match.getPlayerPostion(player2)))
+            coordinates = ",".join(str(value) for value in match.horizon)
+            socket.send_message("%s(%s:[%s])" % (Consts.GAMEDATA, Consts.MAPHORIZON, coordinates))
+            socket.send_message("%s(%s, %s, %s)" % (Consts.PLAYER1, player1.name, player1SocketId, match.getPlayerPostion(player1)))
+            socket.send_message("%s(%s, %s, %s)" % (Consts.PLAYER2, player2.name, player2SocketId, match.getPlayerPostion(player2)))
             
-            
-        #Add the match to the running game list
-        self.__runningGames.append(match)
         
         
         

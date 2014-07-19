@@ -38,10 +38,10 @@ class WebSocketsHandler(SocketServer.StreamRequestHandler):
         if length <= 125:
             self.request.send(chr(length))
         elif length >= 126 and length <= 65535:
-            self.request.send(126)
+            self.request.send(chr(126))
             self.request.send(struct.pack(">H", length))
         else:
-            self.request.send(127)
+            self.request.send(chr(127))
             self.request.send(struct.pack(">Q", length))
         self.request.send(message)
 
