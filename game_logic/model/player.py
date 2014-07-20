@@ -3,8 +3,9 @@ __author__ = 'M'
 
 class Player:
 
-    def __init__(self, name):
+    def __init__(self, name, socket):
         self.__name = name
+        self.__socket = socket
         self.damage = 0
 
     @property
@@ -24,12 +25,16 @@ class Player:
 
     def add_damage(self, damage):
         """
-        FÃ¼gt die BeschÃ¤digung hinzu
-        :param damage: neue BeschÃ¤digung
-        :return: GesamtbeschÃ¤digung
+        Fügt die Beschädigung hinzu
+        :param damage: neue Beschädigung
+        :return: Gesamtbeschädigung
         """
         self.__damage += damage
         if self.__damage > 1:
             self.__damage = 1
 
-        return self.__damage
+        return self.__damage        return self.__name
+    
+    @property
+    def socket (self):
+        return self.__socket

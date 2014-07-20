@@ -7,8 +7,8 @@ class Consts:
     WORLD_WIDTH = 600
 
     TIME_RESOLUTION = 0.0009
-    # 0.001  reicht fÃ¼r 99,47% Treffer bei senkrechtem Schuss
-    # 0.0009 reicht fÃ¼r 99,63% Treffer bei senkrechtem Schuss
+    # 0.001  reicht für 99,47% Treffer bei senkrechtem Schuss
+    # 0.0009 reicht für 99,63% Treffer bei senkrechtem Schuss
 
     g = 9.81
 
