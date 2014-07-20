@@ -6,11 +6,6 @@ from ..utils.classes import *
 from ..utils.gameconsts import Consts
 
 class Calculation:
-    # __horizon = []
-    # __height = 0
-    # __width = 0
-    # __player_radius = 0
-    # __player_positions = []
 
     def __init__(self, map_width, horizon, players, player_positions):
         self.__width = map_width
@@ -18,7 +13,7 @@ class Calculation:
         self.__players = players
         self.__player_positions = player_positions
 
-    def calcHit(self, source, angle, speed):
+    def calc_flugbahn(self, source, angle, speed):
         """
         Berechnet den Auftreffpunkt und die Zerstörung
         :param source: Player
@@ -30,84 +25,65 @@ class Calculation:
             None: nichts getroffen - bleibt in der Luft?
             Hit: Treffer Horizontlinie (percent = 0) oder Target (percent > 0)
         """
-        result = None
+
         source_pos = self.__player_positions[source]
+
         flugbahn = self.__calc_flugbahn(source_pos, angle, speed)
 
         for player in self.__players:
-            # TODO: für Treffer mehrerer Ziele anpassen?
-            # berechnet z.Zt. nur für ersten Treffer
-            result = self.__calc_target_hit(flugbahn, player)
-            if result:
-                break
+            if not player is source:
+                # Selbstabschuss nicht zulassen, macht einige Probleme
+                hit = self.__calc_target_hit(flugbahn, player)
+                flugbahn.setHit(hit)
 
-        if result is None:
-            result = self.__calc_horizon_hit(flugbahn)
+        return flugbahn
 
-        return result
-
-    def calcHorizonHeight(self, source, angle, speed):
-        """
-        Berechnet die höchste Position der Flugbahn
-        :param angle:
-        :param speed:
-        :return:
-        """
-        result = 0
-        source_pos = self.__player_positions[source]
-        flugbahn = self.__calc_flugbahn(source_pos, angle, speed)
-
-        for point in flugbahn:
-            result = max(result, point.y)
-
-        return result
-
-    def __calc_horizon_hit(self, flugbahn):
-        result = None
-
-        for point in flugbahn:
-            last_point = point
-            if not point is flugbahn[0]:
-                if point.y - Consts.BULLET_RADIUS < self.__horizon[point.x]:
-                    # TODO Flugbahn.slice
-                    result = Hit(flugbahn,last_point.x, self.__horizon[point.x])
-
-        return result
+    def __is_horizon_hit(self, bullet_pos):
+        # Horizonttreffer am Rand des Geschosses oder in doch erst in der Mitte ?
+        # TODO: Horizonthöhe berechnen / interpolieren?
+        return bullet_pos.y < self.__horizon[int(bullet_pos.x)]
+        # return bullet_pos.y - Consts.BULLET_RADIUS < self.__horizon[int(round(bullet_pos.x))]
 
     def __calc_target_hit_percent(self, target_pos, bullet_pos):
-        # X- und Y-Abstände ermitteln
-        distance = Point(target_pos.x - bullet_pos.x, target_pos.y - bullet_pos.y)
-
         # kürzesten Abstand zwischen Ziel und Geschossmittelpunkt mit Pytagoras ermitteln
-        distanceValue = math.sqrt(math.pow(distance.x,2) + math.pow(distance.y,2))
+        distanceValue = math.hypot(target_pos.x - bullet_pos.x, target_pos.y - bullet_pos.y)
 
-        # Überdeckung der Kreisradien als Maß für Treffer-% ermitteln
-        # ggf. Flächeninhalt der Überdeckung als genaueres Treffermaß berechnen
-        overlap = -1 * distanceValue - Consts.PLAYER_RADIUS - Consts.BULLET_RADIUS
+        distanceRadii = Consts.PLAYER_RADIUS + Consts.BULLET_RADIUS
+        overlap = distanceRadii - distanceValue
 
-        # Überlappung = Treffer
+        # Überlappung > 0 = Treffer
         if overlap > 0:
-            return float(overlap) / Consts.PLAYER_RADIUS
+            # Überdeckung der Kreisradien als Maß für Treffer-% ermitteln
+            # ggf. Flächeninhalt der Überdeckung als genaueres Treffermaß berechnen
+            # Rückgabe %-genau
+            # TODO ggf. mit Ableitung numerisch den Punkt größter Annäherung berechnen
+            return round(float(overlap) / distanceRadii, 2)
         else:
             return 0
 
     def __calc_target_hit(self, flugbahn, target):
-        result = Hit(flugbahn,0,0,0,target)
+        result = Hit(0,0,0,0,target)
+
         target_pos = self.__player_positions[target]
 
         # Rechteck um Ziel festlegen
-        target_rect = Rect(Point(target_pos.x - Consts.PLAYER_RADIUS, target_pos.y - Consts.PLAYER_RADIUS),
-                           Point(target_pos.x + Consts.PLAYER_RADIUS, target_pos.y + Consts.PLAYER_RADIUS))
-        for point in flugbahn:
+        target_rect = Rect(Point(target_pos.x - Consts.PLAYER_RADIUS, target_pos.y + Consts.PLAYER_RADIUS),
+                           Point(target_pos.x + Consts.PLAYER_RADIUS, target_pos.y - Consts.PLAYER_RADIUS))
+        # abschussPhase = True
+        for point in flugbahn.time_points:
+            # if abschussPhase and math.hypot(point.x, point.y) > Consts.PLAYER_RADIUS:
+            #     abschussPhase = False
             # zuerst grob prüfen, ob Zielrechteck getroffen wurde
+            # (not abschussPhase) and
             if point.x > target_rect.topLeft.x and point.x <= target_rect.bottomRight.x and \
-                point.y >= target_rect.topLeft.y and point.y <= target_rect.bottomRight.y:
+                point.y <= target_rect.topLeft.y and point.y >= target_rect.bottomRight.y:
                 # X und Y des Geschosses im Zielrechteck, Treffer anhand der Umkreise genauer prüfen
                 # Maximalwert zurückgeben
                 hitPercent = self.__calc_target_hit_percent(target_pos, point)
                 if result.percent < hitPercent:
                     result.x = point.x
                     result.y = point.y
+                    result.t = point.t
                     result.percent = hitPercent
 
         if result.percent > 0:
@@ -116,11 +92,26 @@ class Calculation:
             return None
 
     def __calc_flugbahn(self, source_pos, angle, speed):
-        result = []
-        w = self.__width - source_pos.x
+        """
+        Berechnet die Flugbahn bis zum ersten Treffer des Horizonts
+        :param source_pos: Abschusspos. (Mitte Panzer)
+        :param angle: Abschusswinkel (Radiant)
+        :param speed: Abschussgeschwindigkeit (m/s)
+        :return: Flugbahn(source_pos, time_points, targets = None)
+        """
+        t = Consts.TIME_RESOLUTION
+        result = None
+        result = Flugbahn(source_pos, TimePoint(0,0,0), [], list())
 
-        for x in xrange(w):
-            result.append(Point(source_pos.x + x, source_pos.y + Consts.PLAYER_RADIUS + self.__calc_y(x, angle, speed))) # Abschusshöhe. in der Mitte des Spielers?
+        point = self.__calc_pos(t, source_pos, angle, speed)
+        result.time_points.append(point)
+
+        while point.x < Consts.WORLD_WIDTH and (not self.__is_horizon_hit(point)):
+            t += Consts.TIME_RESOLUTION
+            point = self.__calc_pos(t, source_pos, angle, speed)
+            if point.y > result.max_y_point.y:
+                result.max_y_point = point
+            result.time_points.append(point)
 
         return result
 
@@ -128,3 +119,15 @@ class Calculation:
         #TODO Formel prüfen!
         return x * math.tan(angle) - (Consts.g * math.pow(x,2))/(2* math.pow(speed,2) * math.pow(math.cos(angle),2)) # ohne Berücksichtigung Luftwiderstand
 
+    def __calc_pos(self, t, source_pos, angle, speed):
+        # ohne Berücksichtigung Luftwiderstand
+        #v_x0=cos(phi)*v_0
+        #v_y0=sin(phi)*v_0
+        #s_x=v_x0 * t
+        #s_y=v_y0*t-0.5*g*t^2
+        #->
+        #s_x = cos(phi)*v_0*t
+        #s_y = sin(phi) * v_0 * t -0.5* g * t^2
+        return TimePoint(source_pos.x + math.cos(angle) * speed * t, \
+                     source_pos.y + math.sin(angle) * speed * t -0.5 * Consts.g * math.pow(t,2), \
+                     t)

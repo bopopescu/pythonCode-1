@@ -5,6 +5,7 @@ class Player:
 
     def __init__(self, name):
         self.__name = name
+        self.damage = 0
 
     @property
     def match(self):
@@ -20,3 +21,15 @@ class Player:
     @property
     def name (self):
         return self.__name
+
+    def add_damage(self, damage):
+        """
+        Fügt die Beschädigung hinzu
+        :param damage: neue Beschädigung
+        :return: Gesamtbeschädigung
+        """
+        self.__damage += damage
+        if self.__damage > 1:
+            self.__damage = 1
+
+        return self.__damage

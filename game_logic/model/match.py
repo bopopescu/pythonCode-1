@@ -1,15 +1,11 @@
 # coding=utf-8
 __author__ = 'M'
 
-from game_logic.utils.classes import Point
-import json
-
+from ..utils.gameconsts import Consts
 from ..utils.classes import Point
 from ..calculation.calculation import Calculation
 import time
 import random
-
-#import matplotlib.pyplot as plt
 
 class Match:
 
@@ -19,14 +15,14 @@ class Match:
         self.__activePlayer = players[0] # erster Spieler beginnt
         self.__horizon = horizon
         self.__world_width = world_width
-        self.__player_positions = dict()
+        self.__player_positions = dict() # Position = Mittelpunkt des Players
         self.__id = "%f_%s" % (time.time(), random.randint(0,99999))
 
         # Spielerpositionen ermitteln und eintragen
         for i in xrange(len(players)):
             x = player_x_positions[i]
-            print(x)
-            self.__player_positions[players[i]] = Point(x, horizon[x])
+            # x = player_x_positions[0] # Test
+            self.__player_positions[players[i]] = Point(x, horizon[x] + Consts.PLAYER_RADIUS)
 
         self.__calculation = Calculation(world_width, horizon, players, self.__player_positions)
     
@@ -44,7 +40,7 @@ class Match:
 
         return result
 
-    def calcHit(self, source, angle, speed):
+    def calc_flugbahn(self, source, angle, speed):
         #TODO Rückgabe: Treffer, Treffer%, Flugbahn
         """
         Berechnet den Auftreffpunkt
@@ -55,7 +51,7 @@ class Match:
         :param speed: Double (m/s)
         :return: Hit
         """
-        return self.__calculation.calcHit(source, angle, speed)
+        return self.__calculation.calc_flugbahn(source, angle, speed)
 
     @property
     def players(self):

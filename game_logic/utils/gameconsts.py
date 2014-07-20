@@ -1,15 +1,17 @@
+# coding=utf-8
 __author__ = 'M'
 
 class Consts:
     PLAYER_RADIUS = 10
     BULLET_RADIUS = 3
     WORLD_WIDTH = 600
+
+    TIME_RESOLUTION = 0.0009
+    # 0.001  reicht für 99,47% Treffer bei senkrechtem Schuss
+    # 0.0009 reicht für 99,63% Treffer bei senkrechtem Schuss
+
     g = 9.81
-    
-    
-    
-    
-    
+
     #Constants for Client State handling
     CONNECTED = 0
     WAITFORPLAYER = 1
