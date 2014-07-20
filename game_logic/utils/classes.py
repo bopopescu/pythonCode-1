@@ -8,7 +8,7 @@ class Point:
         self.y = y
 
     def __str__(self):
-        return 'x={:n}; y={:n}'.format(self.x, self.y)
+        return "(%i, %i)" % (self.x, self.y)
 
 class TimePoint(Point):
 
