@@ -10,8 +10,8 @@ from game_logic.model.player import Player
 from game_logic.model.match import Match
 
 if __name__ == '__main__':
-    player1 = Player('A')
-    player2 = Player('B')
+    player1 = Player('A',None)
+    player2 = Player('B',None)
 
     print(player1)
     print(player2)

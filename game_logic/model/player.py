@@ -25,15 +25,14 @@ class Player:
 
     def add_damage(self, damage):
         """
-        Fügt die Beschädigung hinzu
-        :param damage: neue Beschädigung
-        :return: Gesamtbeschädigung
+        Fï¿½gt die Beschï¿½digung hinzu
+        :param damage: neue Beschï¿½digung
+        :return: Gesamtbeschï¿½digung
         """
         self.__damage += damage
         if self.__damage > 1:
             self.__damage = 1
 
-        return self.__damage        return self.__name
     
     @property
     def socket (self):
