@@ -104,7 +104,7 @@ class GameSocketHandler(WebSocketsHandler):
             return
         
         #Make the match calculation
-        matchResult = self.__match.calcHit(self.__playerObject, float(angle), float(power))
+        flugbahn = self.__match.calcHit(self.__playerObject, float(angle), float(power))
         
         #Send the result to the clients
         flightPath = ",".join(str(value) for value in matchResult.flugbahn)
@@ -118,7 +118,7 @@ class GameSocketHandler(WebSocketsHandler):
         self.__match.activePlayer = matchResult.target
         
         #Check if it required to close the connection
-        if matchResult.percent >= 100:
+        if matchResult.percent >= 1.0:
             for player in self.__match.players:
                 player.socket.close()
         

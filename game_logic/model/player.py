@@ -25,9 +25,9 @@ class Player:
 
     def add_damage(self, damage):
         """
-        F�gt die Besch�digung hinzu
-        :param damage: neue Besch�digung
-        :return: Gesamtbesch�digung
+        Fügt die Beschädigung hinzu
+        :param damage: neue Beschädigung
+        :return: Gesamtbeschädigung
         """
         self.__damage += damage
         if self.__damage > 1:

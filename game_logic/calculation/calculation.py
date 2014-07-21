@@ -1,4 +1,6 @@
 # coding=utf-8
+from idlelib.run import flush_stdout
+
 __author__ = 'M'
 
 import math
@@ -17,13 +19,12 @@ class Calculation:
         """
         Berechnet den Auftreffpunkt und die Zerstörung
         :param source: Player
-        :param target: Player
         :param angle: Double
         :param power: Double
-        :return: Hit
-        mögl. Rückgabewerte:
-            None: nichts getroffen - bleibt in der Luft?
-            Hit: Treffer Horizontlinie (percent = 0) oder Target (percent > 0)
+        :return: Flugbahn mit Hits
+        mögl. Rückgabewerte in Hits:
+            leer: nichts getroffen oder Horizont getroffen
+            Hit[0..1]: Treffer der Targets
         """
 
         source_pos = self.__player_positions[source]
@@ -36,6 +37,9 @@ class Calculation:
                 hit = self.__calc_target_hit(flugbahn, player)
                 flugbahn.setHit(hit)
 
+        # Flugbahn kürzen, endet beim ersten Treffer!
+        if len(flugbahn.hits) > 0:
+            flugbahn.time_points = flugbahn.time_points[:int(flugbahn.hits[0].t / Consts.TIME_RESOLUTION)]
         return flugbahn
 
     def __is_horizon_hit(self, bullet_pos):
@@ -57,6 +61,10 @@ class Calculation:
             # ggf. Flächeninhalt der Überdeckung als genaueres Treffermaß berechnen
             # Rückgabe %-genau
             # TODO ggf. mit Ableitung numerisch den Punkt größter Annäherung berechnen
+            # formel wolfram alpha
+            # Eingabe:
+            # Reduce[2 v Cos[a] (-q + r + v x Cos[a]) + 2 (g x - v Sin[a]) (-m + p + 0.5 g x^2 - v x Sin[a]) == 0, {a, g, m, p, q, r, v, x}]
+            #(a-pi)/(2 pi)(not element)Z, g!=0,   x = -(-54 g^4 q v cos(a)+54 g^4 r v cos(a)-54 g^3 v^3 sin^3(a)+54 g^3 v^3 sin(a)+sqrt(4 (-9 g^2 v^2 sin^2(a)-6 g^2 (g m-g p-v^2))^3+(-54 g^4 q v cos(a)+54 g^4 r v cos(a)-54 g^3 v^3 sin^3(a)+54 g^3 v^3 sin(a))^2))^(1/3)/(3 2^(1/3) g^2)+(2^(1/3) (-9 g^2 v^2 sin^2(a)-6 g^2 (g m-g p-v^2)))/(3 g^2 (-54 g^4 q v cos(a)+54 g^4 r v cos(a)-54 g^3 v^3 sin^3(a)+54 g^3 v^3 sin(a)+sqrt(4 (-9 g^2 v^2 sin^2(a)-6 g^2 (g m-g p-v^2))^3+(-54 g^4 q v cos(a)+54 g^4 r v cos(a)-54 g^3 v^3 sin^3(a)+54 g^3 v^3 sin(a))^2))^(1/3))+(v sin(a))/g
             return round(float(overlap) / distanceRadii, 2)
         else:
             return 0
@@ -99,10 +107,9 @@ class Calculation:
         :param speed: Abschussgeschwindigkeit (m/s)
         :return: Flugbahn(source_pos, time_points, targets = None)
         """
-        t = Consts.TIME_RESOLUTION
-        result = None
         result = Flugbahn(source_pos, TimePoint(0,0,0), [], list())
 
+        t = Consts.TIME_RESOLUTION
         point = self.__calc_pos(t, source_pos, angle, speed)
         result.time_points.append(point)
 
@@ -116,7 +123,7 @@ class Calculation:
         return result
 
     def __calc_y(self, x, angle, speed):
-        #TODO Formel prüfen!
+        # TODO Formel prüfen!
         return x * math.tan(angle) - (Consts.g * math.pow(x,2))/(2* math.pow(speed,2) * math.pow(math.cos(angle),2)) # ohne Berücksichtigung Luftwiderstand
 
     def __calc_pos(self, t, source_pos, angle, speed):
