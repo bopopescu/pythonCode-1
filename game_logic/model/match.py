@@ -22,7 +22,7 @@ class Match:
         for i in xrange(len(players)):
             x = player_x_positions[i]
             # x = player_x_positions[0] # Test
-            self.__player_positions[players[i]] = Point(x, horizon[x] + Consts.PLAYER_RADIUS)
+            self.__player_positions[players[i]] = Point(x, horizon[x].y + Consts.PLAYER_RADIUS)
 
         self.__calculation = Calculation(world_width, horizon, players, self.__player_positions)
     

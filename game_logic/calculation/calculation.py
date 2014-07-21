@@ -15,6 +15,17 @@ class Calculation:
         self.__players = players
         self.__player_positions = player_positions
 
+    @staticmethod
+    def interpolate_point(x,point_0, point_1):
+        diff_x = point_1.x - point_0.x
+        delta_x = x - point_0.x
+        if (diff_x != 0):
+            result = Point(x, (point_0.y + (delta_x * float(point_1.y - point_0.y) / diff_x)))
+        else:
+            result = Point(x,(point_1.y + point_0.y) / 2) # sinnvollen Wert annehmen ?
+
+        return result
+
     def calc_flugbahn(self, source, angle, speed):
         """
         Berechnet den Auftreffpunkt und die Zerstörung
@@ -113,7 +124,7 @@ class Calculation:
         point = self.__calc_pos(t, source_pos, angle, speed)
         result.time_points.append(point)
 
-        while point.x < Consts.WORLD_WIDTH and (not self.__is_horizon_hit(point)):
+        while int(point.x) < Consts.WORLD_WIDTH and (not self.__is_horizon_hit(point)):
             t += Consts.TIME_RESOLUTION
             point = self.__calc_pos(t, source_pos, angle, speed)
             if point.y > result.max_y_point.y:
