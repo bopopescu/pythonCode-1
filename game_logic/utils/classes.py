@@ -17,7 +17,7 @@ class TimePoint(Point):
         self.t = t
 
     def __str__(self):
-        return Point.__str__() + '; t={:n}'.format(self.t)
+        return "(%i, %i, %i)" % (self.x, self.y, self.t)
 
 class Hit(Point):
     def __init__(self, x, y, t, percent = 0, target = None):

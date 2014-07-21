@@ -9,6 +9,7 @@ from game_logic.utils.gameconsts import Consts
 from game_logic.model.player import Player
 import random
 import time
+import json
 
 class GameSocketHandler(WebSocketsHandler):
     '''
@@ -60,7 +61,7 @@ class GameSocketHandler(WebSocketsHandler):
         Function called, when an error occurs 
         '''
         print "Connection lost from client %s with error: %s" % (self.client_address, str(ex))
-        raise  ex
+        raise  ex # TODO: Just for debug
         self.__socketMaintainer.clientDisconnected(self.__socketID)
         
         
@@ -104,24 +105,92 @@ class GameSocketHandler(WebSocketsHandler):
             return
         
         #Make the match calculation
-        flugbahn = self.__match.calcHit(self.__playerObject, float(angle), float(power))
+        flightPath = self.__match.calc_flugbahn(self.__playerObject, float(angle), float(power))
+        
+        message = self.__createJSON(flightPath)
+        
         
         #Send the result to the clients
-        flightPath = ",".join(str(value) for value in matchResult.flugbahn)
-        messageString = "%s(%s,[%s],%s)" % (Consts.FIRED, matchResult.target.socketId, flightPath, matchResult.percent)
-        #messageString = "%s(%s,[%s],%s)" % (Consts.FIRED, "SocketId", flightPath, "100") # TODO: Just for testing
+        messageString = "%s:%s" % (Consts.FIRED, message)
         
         for player in self.__match.players:
             player.socket.send_message(messageString)
-        
+         
         #Change the player in the match
-        self.__match.activePlayer = matchResult.target
+        self.__match.activePlayer = self.__foundNextPlayer(self.__playerObject)
+         
+    
+    def __createJSON (self, flightPath):
+        '''
+        Function which will create a JSON Object for the flight path
+        '''
+        #Define format values
+        message = """
+                  {
+                      "StartPoint": "%(__startPoint__)s",
+                      "MaxYPoint":  "%(__maxYPoint__)s",
+                      "TimePoints": "[%(__timePoints__)s]",
+                      "Hits":       "[%(__hits__)s]"
+                  }
+                  """
         
-        #Check if it required to close the connection
-        if matchResult.percent >= 1.0:
-            for player in self.__match.players:
-                player.socket.close()
+        hitObject = """
+                    {
+                        "X": "%(__X__)s",
+                        "Y": "%(__Y__)s",
+                        "T": "%(__T__)s",
+                        "Percent": "%(__percent__)s",
+                        "PlayerID": "%(__playerID__)s"
+                    }
+                    """
         
+        hitObjects = []
+        
+        #Create the hit Objects
+        for hit in flightPath.hits:
+            if hit.target is None:
+                target = ""
+            else:
+                target = hit.target.name
+            
+            subst = {
+                     "__X__" : hit.x,
+                     "__Y__" : hit.y,
+                     "__T__" : hit.t,
+                     "__percent__" : hit.percent,
+                     "__playerID__" : target
+                     }
+            
+            hitObjects.append(hitObject % subst)
+        
+        
+        #Create the json Template
+        subst = {
+                     "__startPoint__" : str(flightPath.start_point),
+                     "__maxYPoint__" : str(flightPath.max_y_point),
+                     "__timePoints__" : ",".join(str(x) for x in flightPath.time_points),
+                     "__hits__" : ",".join(hitObjects)
+                }
+        
+        return message % subst
+    
+    def __foundNextPlayer (self, currentPlayer):
+        '''
+        Function which will found the player for the next turn
+        '''
+        
+        i=0
+        for player in self.__match.players:
+            i = i + 1
+            if player == currentPlayer:
+                break
+                
+                
+        if i >= len(self.__match.players):
+            i=0
+            
+        return self.__match.players[i] 
+
     
     def close (self):
         '''
@@ -130,9 +199,7 @@ class GameSocketHandler(WebSocketsHandler):
         print "Close connection"
         self.__keepAlive=False
         
-    
-    
-    
+
     #Getter + Setter Methods
     def getPlayerObject (self):
         return self.__playerObject
