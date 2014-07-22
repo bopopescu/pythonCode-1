@@ -84,10 +84,30 @@ class SocketMaintainer(object):
         #Send the game data
         for socket in playerSockets:
             coordinates = ",".join(str(value) for value in match.horizon)
-            socket.send_message("%s(%s:[%s])" % (Consts.GAMEDATA, Consts.MAPHORIZON, coordinates))
-            socket.send_message("%s(%s, %s, %s)" % (Consts.PLAYER1, player1.name, player1SocketId, match.getPlayerPostion(player1)))
-            socket.send_message("%s(%s, %s, %s)" % (Consts.PLAYER2, player2.name, player2SocketId, match.getPlayerPostion(player2)))
+            socket.send_message("%s:[%s])" % (Consts.MAPHORIZON, coordinates))
             
+            socket.send_message("%s: %s" % (Consts.PLAYER1, self.__createJSONForPlayerObject(player1.name, player1SocketId,  match.getPlayerPostion(player1))))
+            socket.send_message("%s: %s" % (Consts.PLAYER2, self.__createJSONForPlayerObject(player2.name, player2SocketId,  match.getPlayerPostion(player2))))
+            
+    
+    def __createJSONForPlayerObject (self, playerName, playerSocketId, positon):
+        '''
+        Function which will create a JSON Object for the Player
+        '''
+        
+        template = """
+        {
+            "Name":     "%(__name__)s",
+            "ID":       "%(__id__)s",
+            "Position": %(__position__)s
+        }
+                   """
+                   
+        subst = {
+                 "__name__"     : playerName,
+                 "__id__"       : playerSocketId,
+                 "__position__" : str(positon)
+                 }
         
         
-        
+        return template % subst

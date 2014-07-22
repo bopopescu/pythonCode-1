@@ -33,7 +33,7 @@ class Consts:
     
     #outgoing
     WAITFORPLAYERMESSAGE = "WaitForPlayer"
-    PLAYERAVAIBLE = "PlayerAvaible"
+    PLAYERAVAIBLE = "PlayerAvailable"
     GAMEDATA = "GameData"
     PLAYER1 = "Player1"
     PLAYER2 = "Player2"

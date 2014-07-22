@@ -8,7 +8,7 @@ class Point:
         self.y = y
 
     def __str__(self):
-        return "(%i, %i)" % (self.x, self.y)
+        return """{"X": %i, "Y": %i}""" % (self.x, self.y)
 
 class TimePoint(Point):
 
@@ -17,7 +17,7 @@ class TimePoint(Point):
         self.t = t
 
     def __str__(self):
-        return "(%i, %i, %.4f)" % (self.x, self.y, self.t)
+        return """{"Y": %i, "Y": %i, "T": %.4f}""" % (self.x, self.y, self.t)
 
 class Hit(Point):
     def __init__(self, x, y, t, percent = 0, target = None):
