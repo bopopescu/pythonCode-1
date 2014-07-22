@@ -124,7 +124,7 @@ class Calculation:
         point = self.__calc_pos(t, source_pos, angle, speed)
         result.time_points.append(point)
 
-        while int(point.x) < Consts.WORLD_WIDTH and (not self.__is_horizon_hit(point)):
+        while int(point.x) < Consts.WORLD_WIDTH and (point.y > 0)  and (not self.__is_horizon_hit(point)):
             t += Consts.TIME_RESOLUTION
             point = self.__calc_pos(t, source_pos, angle, speed)
             if point.y > result.max_y_point.y:
