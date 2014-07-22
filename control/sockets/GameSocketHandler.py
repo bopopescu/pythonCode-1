@@ -9,7 +9,6 @@ from game_logic.utils.gameconsts import Consts
 from game_logic.model.player import Player
 import random
 import time
-import json
 
 class GameSocketHandler(WebSocketsHandler):
     '''
@@ -61,8 +60,9 @@ class GameSocketHandler(WebSocketsHandler):
         Function called, when an error occurs 
         '''
         print "Connection lost from client %s with error: %s" % (self.client_address, str(ex))
-        raise  ex # TODO: Just for debug
         self.__socketMaintainer.clientDisconnected(self.__socketID)
+        self.close()
+        raise  ex # TODO: Just for debug
         
         
     def on_message(self, message):
@@ -136,10 +136,10 @@ class GameSocketHandler(WebSocketsHandler):
         
         hitObject = """
                     {
-                        "X": "%(__X__)s",
-                        "Y": "%(__Y__)s",
-                        "T": "%(__T__)s",
-                        "Percent": "%(__percent__)s",
+                        "X": "%(__X__)i",
+                        "Y": "%(__Y__)i",
+                        "T": "%(__T__).4f",
+                        "Percent": "%(__percent__).4f",
                         "PlayerID": "%(__playerID__)s"
                     }
                     """
@@ -198,6 +198,8 @@ class GameSocketHandler(WebSocketsHandler):
         '''
         print "Close connection"
         self.__keepAlive=False
+        self.request.close()
+        
         
 
     #Getter + Setter Methods
