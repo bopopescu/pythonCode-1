@@ -93,7 +93,7 @@ class GameSocketHandler(WebSocketsHandler):
         self.__match = match
         self.__state = Consts.GAMERUNNING
         
-        self.send_message("%s(%s)" % (Consts.PLAYERAVAIBLE, oponentName))
+        self.send_message("%s" % (Consts.PLAYERAVAILABLE))
     
     def __receivedFireCommand (self, angle, power):
         '''
