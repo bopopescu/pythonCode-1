@@ -19,16 +19,14 @@ class TimePoint(Point):
     def __str__(self):
         return """{"Y": %i, "Y": %i, "T": %.4f}""" % (self.x, self.y, self.t)
 
-class Hit(Point):
+class Hit(TimePoint):
     def __init__(self, x, y, t, percent = 0, target = None):
-        self.x = x
-        self.y = y
-        self.t = t
+        TimePoint.__init__(self,x, y, t)
         self.percent = percent
         self.target = target
 
     def __str__(self):
-        return Point.__str__(self) + '; damage={:.2f}%'.format(self.percent * 100)
+        return TimePoint.__str__(self) + '; damage={:.2f}%'.format(self.percent * 100)
 
 class Rect:
     topLeft = Point(x=0, y=0)

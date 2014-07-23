@@ -24,6 +24,7 @@ class MatchBuilder:
                       MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
 
         # ist GAP_TO_FIRST_SAMPLING_POINT notwendig?
+        # TODO: an allen Stützpunkten GAP_TO_FIRST_SAMPLING_POINT berücksichtigen!
         max_x = world_width - 1 - Consts.GAP_TO_FIRST_SAMPLING_POINT
         for i in xrange(points_count-2):
             points.append(Point(MatchBuilder.f_random.randint(Consts.GAP_TO_FIRST_SAMPLING_POINT, max_x),
@@ -39,13 +40,13 @@ class MatchBuilder:
 
         result.append(start_point) # letzten Punkt noch extra einfügen
 
-        # result = [1]
-        # for i in xrange(1,100):
-        #     result.append(result[i - 1] + 1)
-        # for i in xrange(100,500):
-        #     result.append(100)
-        # for i in xrange(500,world_width):
-        #     result.append(result[i - 1] - 1)
+        result = [Point(0,1)]
+        for i in xrange(1,100):
+            result.append(Point(i,result[i - 1].y + 1))
+        for i in xrange(100,500):
+            result.append(Point(i,100))
+        for i in xrange(500,world_width):
+            result.append(Point(i,result[i - 1].y - 1))
 
         return result
 
