@@ -8,7 +8,7 @@ class Point:
         self.y = y
 
     def __str__(self):
-        return """{"X": %i, "Y": %i}""" % (self.x, self.y)
+        return """{"x": %i, "y": %i}""" % (self.x, self.y)
 
 class TimePoint(Point):
 
@@ -17,7 +17,7 @@ class TimePoint(Point):
         self.t = t
 
     def __str__(self):
-        return """{"Y": %i, "Y": %i, "T": %.4f}""" % (self.x, self.y, self.t)
+        return """{"x": %i, "y": %i, "t": %.4f}""" % (self.x, self.y, self.t)
 
 class Hit(TimePoint):
     def __init__(self, x, y, t, percent = 0, target = None):
@@ -26,7 +26,9 @@ class Hit(TimePoint):
         self.target = target
 
     def __str__(self):
-        return TimePoint.__str__(self) + '; damage={:.2f}%'.format(self.percent * 100)
+        return """{"x": %i, "y": %i, "t": %.4f, "percent": %.2f}""" % (self.x, self.y, self.t, self.percent)
+        # geht so nicht, wg. JSON-Klammerung:
+        # return TimePoint.__str__(self) + '; damage={:.2f}%'.format(self.percent * 100)
 
 class Rect:
     topLeft = Point(x=0, y=0)

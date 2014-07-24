@@ -17,7 +17,7 @@ if __name__ == '__main__':
         angle = math.pi / 4
         speed = 200
         flugbahn = testMatch.calc_flugbahn(player1, angle, speed)
-        print(flugbahn.time_points[len(flugbahn.time_points)-1].__str__())
+        print('letzter Punkt: ' + flugbahn.time_points[len(flugbahn.time_points)-1].__str__())
         print('Schusshöhe: {:.2f}'.format(flugbahn.max_y_point.y))
         for hit in flugbahn.hits:
             print('Treffer: ' + hit.__str__())

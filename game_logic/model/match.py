@@ -9,11 +9,12 @@ import random
 
 class Match:
 
-    def __init__(self, players, world_width, horizon, player_x_positions):
+    def __init__(self, players, world_width, horizon_skeleton_points, player_x_positions):
 
         self.__players = players
         self.__activePlayer = players[0] # erster Spieler beginnt
-        self.__horizon = horizon
+        self.__horizon_skeleton_points = horizon_skeleton_points # Stützpunkte des Horizonts
+        self.__horizon = self.__get_new_horizon(horizon_skeleton_points)
         self.__world_width = world_width
         self.__player_positions = dict() # Position = Mittelpunkt des Players
         self.__id = "%f_%s" % (time.time(), random.randint(0,99999))
@@ -22,10 +23,24 @@ class Match:
         for i in xrange(len(players)):
             x = player_x_positions[i]
             # x = player_x_positions[0] # Test
-            self.__player_positions[players[i]] = Point(x, horizon[x].y + Consts.PLAYER_RADIUS)
+            self.__player_positions[players[i]] = Point(x, self.__horizon[x].y + Consts.PLAYER_RADIUS)
 
-        self.__calculation = Calculation(world_width, horizon, players, self.__player_positions)
+        self.__calculation = Calculation(world_width, self.__horizon, players, self.__player_positions)
     
+
+    def __get_new_horizon(self, horizon_skeleton_points):
+
+        result = []
+        start_point = horizon_skeleton_points[0]
+        for point in horizon_skeleton_points[1::]:
+            for x in xrange(start_point.x, point.x):
+                result.append(Calculation.interpolate_point(x, start_point, point))
+            start_point = point
+
+        result.append(start_point) # letzten Punkt noch extra einfügen
+
+        return result
+
 
     @property
     def calculation(self):

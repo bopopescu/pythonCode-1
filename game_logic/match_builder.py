@@ -12,11 +12,9 @@ class MatchBuilder:
     f_random = random
 
     @staticmethod
-    def __get_new_horizon(world_width):
-        #TODO Random init mit x Stützpunkten
+    def __get_new_horizon_skeleton(world_width):
         points_count = MatchBuilder.f_random.randint(Consts.MIN_SAMPLING_POINTS, Consts.MAX_SAMPLING_POINTS)
 
-        result = []
         points = []
         points.append(Point(0,
                       MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
@@ -32,23 +30,10 @@ class MatchBuilder:
 
         points.sort(key= lambda point: point.x)
 
-        start_point = points[0]
-        for point in points[1::]:
-            for x in xrange(start_point.x, point.x):
-                result.append(Calculation.interpolate_point(x, start_point, point))
-            start_point = point
+        #TODO Random wieder aktivieren
+        points = [Point(0,0), Point(100,100), Point(500,100), Point(world_width-1, 0)]
 
-        result.append(start_point) # letzten Punkt noch extra einfügen
-
-        result = [Point(0,1)]
-        for i in xrange(1,100):
-            result.append(Point(i,result[i - 1].y + 1))
-        for i in xrange(100,500):
-            result.append(Point(i,100))
-        for i in xrange(500,world_width):
-            result.append(Point(i,result[i - 1].y - 1))
-
-        return result
+        return points
 
     @staticmethod
     def __get_new_player_x_positions(players, world_width):
@@ -73,7 +58,7 @@ class MatchBuilder:
         """
         MatchBuilder.f_random.seed()
         world_width = Consts.WORLD_WIDTH
-        match = Match(players, world_width, MatchBuilder.__get_new_horizon(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
+        match = Match(players, world_width, MatchBuilder.__get_new_horizon_skeleton(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
 
         for player in players:
             player.match = match
