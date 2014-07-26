@@ -83,6 +83,10 @@ class Match:
     @property
     def horizon(self):
         return self.__horizon
+        
+    @property
+    def horizonSkeletonPoints(self):
+        return self.__horizon_skeleton_points
     
     @property
     def id (self):
