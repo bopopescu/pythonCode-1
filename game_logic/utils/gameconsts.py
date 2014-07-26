@@ -30,6 +30,9 @@ class Consts:
     #incoming
     LOGON = "Logon"
     FIRE = "Fire"
+    PLAYERNAME = "name"
+    ANGLE = "angle"
+    POWER = "power"
     
     #outgoing
     WAITFORPLAYERMESSAGE = "WaitForPlayer"

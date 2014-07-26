@@ -9,6 +9,7 @@ from game_logic.utils.gameconsts import Consts
 from game_logic.model.player import Player
 import random
 import time
+import json
 
 class GameSocketHandler(WebSocketsHandler):
     '''
@@ -70,18 +71,16 @@ class GameSocketHandler(WebSocketsHandler):
         Function called when a new message received
         '''
         #Handle the message
-        keyword, paramString = message.split("(")
-        paramString = paramString[:-1]
-        #Split the param String in a param array
-        params = paramString.split(",")
-        
+        keyword, paramString = message.split(":", 1)
+        resultDict = json.loads(paramString)
+                
         #handle the keywords
         if keyword == Consts.LOGON:
             self.__state = Consts.WAITFORPLAYER
-            self.__playerObject = Player(params[0], self)
+            self.__playerObject = Player(resultDict[Consts.PLAYERNAME], self)
             self.__socketMaintainer.playerWantToPlay(self.__socketID)
         elif keyword == Consts.FIRE:
-            self.__receivedFireCommand(params[0], params[1])
+            self.__receivedFireCommand(resultDict[Consts.ANGLE], resultDict[Consts.POWER])
         else:
             self.close()
             
