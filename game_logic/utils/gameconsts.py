@@ -7,10 +7,11 @@ class Consts:
     WORLD_WIDTH = 600
 
     MIN_HORIZON_HEIGHT = 0
-    MAX_HORIZON_HEIGHT = 400
+    MAX_HORIZON_HEIGHT = 380
     MIN_SAMPLING_POINTS = 10 # minimale Anzahl Stuetzstellen f. Horizont
-    MAX_SAMPLING_POINTS = 20 # maximale Anzahl Stuetzstellen f. Horizont
-    GAP_TO_FIRST_SAMPLING_POINT = 50 # Abstand bis zur ersten / letzten Stuetzstelle
+    MAX_SAMPLING_POINTS = 30 # maximale Anzahl Stuetzstellen f. Horizont
+    GAP_TO_FIRST_SAMPLING_POINT = 0 # Abstand bis zur ersten / letzten Stuetzstelle
+    MAX_DERIVATION = 3 # max. Höhe der Ableitung bzw. Steigung des Horizonts
 
     TIME_RESOLUTION = 0.0009
     # 0.001  reicht fuer 99,47% Treffer bei senkrechtem Schuss

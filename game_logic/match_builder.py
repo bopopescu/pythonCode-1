@@ -13,25 +13,49 @@ class MatchBuilder:
 
     @staticmethod
     def __get_new_horizon_skeleton(world_width):
-        points_count = MatchBuilder.f_random.randint(Consts.MIN_SAMPLING_POINTS, Consts.MAX_SAMPLING_POINTS)
+        MatchBuilder.f_random.seed()
 
         points = []
+        MAX_LOOPS = 9000
+
+        points_count = MatchBuilder.f_random.randint(Consts.MIN_SAMPLING_POINTS, Consts.MAX_SAMPLING_POINTS)
+        num_loops = 0
+
+        # Anfang und Ende setzen - inkonsistent, bad smell!
         points.append(Point(0,
                       MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
         points.append(Point(world_width - 1,
                       MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
 
-        # ist GAP_TO_FIRST_SAMPLING_POINT notwendig?
-        # TODO: an allen Stützpunkten GAP_TO_FIRST_SAMPLING_POINT berücksichtigen!
-        max_x = world_width - 1 - Consts.GAP_TO_FIRST_SAMPLING_POINT
-        for i in xrange(points_count-2):
-            points.append(Point(MatchBuilder.f_random.randint(Consts.GAP_TO_FIRST_SAMPLING_POINT, max_x),
+        max_x = world_width - 2
+
+        while len(points) < points_count  and num_loops < MAX_LOOPS:
+            num_loops += 1
+            points.append(Point(MatchBuilder.f_random.randint(1, max_x),
                           MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
 
-        points.sort(key= lambda point: point.x)
+            points.sort(key= lambda point: point.x)
+
+            start_point = points[0]
+            is_valid = True
+            for point in points[1::]:
+                if point.x == start_point.x:
+                    points.remove(point)
+                else:
+                    c = abs(Calculation.derivation(start_point, point))
+                    if c > Consts.MAX_DERIVATION:
+                        if point.x > (max_x): #Endpunkt nicht löschen ?!
+                            points.remove(start_point)
+                        else:
+                            points.remove(point)
+                        # is_valid = False
+                        # MatchBuilder.f_random.seed()
+                        # break
+                    else:
+                        start_point = point
 
         #TODO Random wieder aktivieren
-        points = [Point(0,0), Point(100,100), Point(500,100), Point(world_width-1, 0)]
+        # points = [Point(0,0), Point(100,100), Point(500,100), Point(world_width-1, 0)]
 
         return points
 
