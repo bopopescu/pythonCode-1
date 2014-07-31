@@ -127,10 +127,10 @@ class GameSocketHandler(WebSocketsHandler):
         #Define format values
         message = """
                   {
-                      "StartPoint": "%(__startPoint__)s",
-                      "MaxYPoint":  "%(__maxYPoint__)s",
-                      "TimePoints": "[%(__timePoints__)s]",
-                      "Hits":       "[%(__hits__)s]"
+                      "StartPoint": %(__startPoint__)s,
+                      "MaxYPoint":  %(__maxYPoint__)s,
+                      "TimePoints": [%(__timePoints__)s],
+                      "Hits":       [%(__hits__)s]
                   }
                   """
         
