@@ -41,7 +41,6 @@ from mysql.connector import errors
 from mysql.connector.utils import int4store
 from mysql.connector.cursor import (CursorBase, MySQLCursor, MySQLCursorRaw,
     MySQLCursorBuffered, MySQLCursorBufferedRaw, MySQLCursorPrepared)
-from mysql.connector.authentication import get_auth_plugin
 
 DEFAULT_CONFIGURATION = {
     'database': None,
@@ -73,7 +72,6 @@ DEFAULT_CONFIGURATION = {
     'connect_timeout': None,
     'dsn': None,
     'force_ipv6': False,
-    'auth_plugin': None,
 }
 
 
@@ -116,9 +114,6 @@ class MySQLConnection(object):
 
         self._prepared_statements = None
 
-        self._ssl_active = False
-        self._auth_plugin = None
-
         if len(kwargs) > 0:
             self.connect(**kwargs)
 
@@ -152,76 +147,42 @@ class MySQLConnection(object):
                 "MySQL Version '%s' is not supported." % \
                 handshake['server_version_original'])
 
-        if handshake['capabilities'] & ClientFlag.PLUGIN_AUTH:
-            self.set_client_flags([ClientFlag.PLUGIN_AUTH])
-
         self._handshake = handshake
         self._server_version = version
 
     def _do_auth(self, username=None, password=None, database=None,
                  client_flags=0, charset=33, ssl_options=None):
         """Authenticate with the MySQL server
-
-        Authentication happens in two parts. We first send a response to the
-        handshake. The MySQL server will then send either an AuthSwitchRequest
-        or an error packet.
-
-        Raises NotSupportedError when we get the old, insecure password
-        reply back. Raises any error coming from MySQL.
         """
-        self._ssl_active = False
         if client_flags & ClientFlag.SSL and ssl_options:
             packet = self._protocol.make_auth_ssl(charset=charset,
                                                   client_flags=client_flags)
             self._socket.send(packet)
             self._socket.switch_to_ssl(**ssl_options)
-            self._ssl_active = True
 
         packet = self._protocol.make_auth(
-            handshake=self._handshake,
+            seed=self._handshake['scramble'],
             username=username, password=password, database=database,
-            charset=charset, client_flags=client_flags,
-            ssl_enabled=self._ssl_active,
-            auth_plugin=self._auth_plugin)
+            charset=charset, client_flags=client_flags)
         self._socket.send(packet)
-        self._auth_switch_request(username, password)
-
-        if (not (client_flags & ClientFlag.CONNECT_WITH_DB)
-            and database):
-            self.cmd_init_db(database)
-
-        return True
-
-    def _auth_switch_request(self, username=None, password=None):
-        """Handle second part of authentication
-
-        Raises NotSupportedError when we get the old, insecure password
-        reply back. Raises any error coming from MySQL.
-        """
         packet = self._socket.recv()
-        if packet[4] == '\xfe' and len(packet) == 5:
+
+        if packet[4] == '\xfe':
             raise errors.NotSupportedError(
               "Authentication with old (insecure) passwords "
               "is not supported. For more information, lookup "
               "Password Hashing in the latest MySQL manual")
-        elif packet[4] == '\xfe':
-            # AuthSwitchRequest
-            (new_auth_plugin,
-             auth_data) = self._protocol.parse_auth_switch_request(packet)
-            auth = get_auth_plugin(new_auth_plugin)(
-                auth_data, password=password, ssl_enabled=self._ssl_active)
-            response = auth.auth_response()
-            if response == '\x00':
-                self._socket.send('')
-            else:
-                self._socket.send(response)
-            packet = self._socket.recv()
-            if packet[4] != '\x01':
-                return self._handle_ok(packet)
-            else:
-                auth_data = self._protocol.parse_auth_more_data(packet)
         elif packet[4] == '\xff':
             raise errors.get_exception(packet)
+
+        try:
+            if (not (client_flags & ClientFlag.CONNECT_WITH_DB)
+                and database):
+                self.cmd_init_db(database)
+        except:
+            raise
+
+        return True
 
     def config(self, **kwargs):
         """Configure the MySQL Connection
@@ -262,7 +223,7 @@ class MySQLConnection(object):
             pass  # Missing compress argument is OK
 
         # Configure character set and collation
-        if 'charset' in config or 'collation' in config:
+        if ('charset' in config or 'collation' in config):
             try:
                 charset = config['charset']
                 del config['charset']
@@ -301,7 +262,7 @@ class MySQLConnection(object):
                 pass  # Missing compat argument is OK
 
         # Configure login information
-        if 'user' in config or 'password' in config:
+        if ('user' in config or 'password' in config):
             try:
                 user = config['user']
                 del config['user']
@@ -332,7 +293,10 @@ class MySQLConnection(object):
             except KeyError:
                 raise AttributeError("Unsupported argument '{0}'".format(key))
             # SSL Configuration
-            if key.startswith('ssl_'):
+            if key == 'ssl_verify_cert':
+                set_ssl_flag = True
+                self._ssl.update({'verify_cert': value})
+            elif key.startswith('ssl_') and value:
                 set_ssl_flag = True
                 self._ssl.update({key.replace('ssl_', ''): value})
             else:
@@ -346,24 +310,12 @@ class MySQLConnection(object):
             if 'verify_cert' not in self._ssl:
                 self._ssl['verify_cert'] = \
                     DEFAULT_CONFIGURATION['ssl_verify_cert']
-            # Make sure both ssl_key/ssl_cert are set, or neither (XOR)
-            if 'ca' not in self._ssl or self._ssl['ca'] is None:
-                raise AttributeError(
-                    "Missing ssl_ca argument.")
-            if bool('key' in self._ssl) != bool('cert' in self._ssl):
-                raise AttributeError(
-                    "ssl_key and ssl_cert need to be both "
-                    "specified, or neither."
-                )
-            # Make sure key/cert are set to None
-            elif not set(('key', 'cert')) <= set(self._ssl):
-                self._ssl['key'] = None
-                self._ssl['cert'] = None
-            elif (self._ssl['key'] is None) != (self._ssl['cert'] is None):
-                raise AttributeError(
-                    "ssl_key and ssl_cert need to be both "
-                    "set, or neither."
-                )
+            required_keys = set(['ca', 'cert', 'key'])
+            diff = list(required_keys - set(self._ssl.keys()))
+            if diff:
+                missing_attrs = ["ssl_" + val for val in diff]
+                raise AttributeError("Missing SSL argument(s): {0}".format(
+                    ', '.join(missing_attrs)))
             self.set_client_flags([ClientFlag.SSL])
 
     def _get_connection(self):
@@ -843,26 +795,11 @@ class MySQLConnection(object):
             raise errors.InternalError("Unread result found.")
 
         packet = self._protocol.make_change_user(
-            handshake=self._handshake,
+            seed=self._handshake['scramble'],
             username=username, password=password, database=database,
-            charset=charset, client_flags=self._client_flags,
-            ssl_enabled=self._ssl_active,
-            auth_plugin=self._auth_plugin)
+            charset=charset, client_flags=self._client_flags)
         self._socket.send(packet, 0)
-
-        ok_packet = self._auth_switch_request(username, password)
-
-        try:
-            if (not (self._client_flags & ClientFlag.CONNECT_WITH_DB)
-                and database):
-                self.cmd_init_db(database)
-        except:
-            raise
-
-        self._charset_id = charset
-        self._post_connection()
-
-        return ok_packet
+        return self._handle_ok(self._socket.recv())
 
     def is_connected(self):
         """Reports whether the connection to MySQL Server is available
@@ -878,39 +815,6 @@ class MySQLConnection(object):
         except errors.Error:
             return False  # This method does not raise
         return True
-
-    def reset_session(self, user_variables=None, session_variables=None):
-        """Clears the current active session
-
-        This method resets the session state, if the MySQL server is 5.7.3
-        or later active session will be reset without re-authenticating.
-        For other server versions session will be reset by re-authenticating.
-
-        It is possible to provide a sequence of variables and their values to
-        be set after clearing the session. This is possible for both user
-        defined variables and session variables.
-        This method takes two arguments user_variables and session_variables
-        which are dictionaries.
-
-        Raises OperationalError if not connected, InternalError if there are
-        unread results and InterfaceError on errors.
-        """
-        if not self.is_connected():
-            raise errors.OperationalError("MySQL Connection not available.")
-
-        try:
-            self.cmd_reset_connection()
-        except errors.NotSupportedError:
-            self.cmd_change_user(self._user, self._password,
-                                 self._database, self._charset_id)
-
-        cur = self.cursor()
-        if user_variables:
-            for key, value in user_variables.items():
-                cur.execute("SET @`{0}` = %s".format(key), (value,))
-        if session_variables:
-            for key, value in session_variables.items():
-                cur.execute("SET SESSION `{0}` = %s".format(key), (value,))
 
     def reconnect(self, attempts=1, delay=0):
         """Attempt to reconnect to the MySQL server
@@ -1240,8 +1144,7 @@ class MySQLConnection(object):
             switch = 'ON'
         else:
             switch = 'OFF'
-        self._execute_query("SET @@session.autocommit = {0}".format(switch))
-        self._autocommit = value
+        self._execute_query("SET @@session.autocommit = %s" % switch)
 
     def get_autocommit(self):
         """Get whether autocommit is on or off"""
@@ -1591,18 +1494,3 @@ class MySQLConnection(object):
         """
         self._handle_ok(self._send_cmd(ServerCmd.STMT_RESET,
                                        int4store(statement_id)))
-
-    def cmd_reset_connection(self):
-        """Resets the session state without re-authenticating
-
-        Works only for MySQL server 5.7.3 or later.
-        The result is a dictionary with OK packet information.
-
-        Returns a dict()
-        """
-        if self._server_version < (5, 7, 3):
-            raise errors.NotSupportedError("MySQL version 5.7.2 and "
-                                           "earlier does not support "
-                                           "COM_RESET_CONNECTION.")
-        self._handle_ok(self._send_cmd(ServerCmd.RESET_CONNECTION))
-        self._post_connection()

@@ -537,11 +537,6 @@ class MySQLCursor(CursorBase):
         elif len(RE_SQL_SPLIT_STMTS.split(operation)) > 1:
             raise errors.InternalError(
                 "executemany() does not support multiple statements")
-        try:
-            if isinstance(operation, unicode):
-                operation = operation.encode(self._connection.python_charset)
-        except (UnicodeDecodeError, UnicodeEncodeError) as err:
-            raise errors.ProgrammingError(str(err))
 
         # Optimize INSERTs by batching them
         if re.match(RE_SQL_INSERT_STMT, operation):
@@ -607,22 +602,9 @@ class MySQLCursor(CursorBase):
           END
 
           2) Executing in Python:
-          args = (5, 5, 0)  # 0 is to hold pprod
+          args = (5,5,0) # 0 is to hold pprod
           cursor.callproc('multiply', args)
           print(cursor.fetchone())
-
-        For OUT and INOUT parameters the user should provide the
-        type of the parameter as well. The argument should be a
-        tuple with first item as the value of the parameter to pass
-        and second argument the type of the argument.
-
-        In the above example, one can call callproc method like:
-          args = (5, 5, (0, 'INT'))
-          cursor.callproc('multiply', args)
-
-        The type of the argument given in the tuple will be used by
-        the MySQL CAST function to convert the values in the corresponding
-        MySQL type (See CAST in MySQL Reference for more information)
 
         Does not return a value, but a result set will be
         available when the CALL-statement execute successfully.
@@ -640,18 +622,12 @@ class MySQLCursor(CursorBase):
         results = []
         try:
             argnames = []
-            argtypes = []
+
             if args:
                 for idx, arg in enumerate(args):
                     argname = argfmt.format(name=procname, index=idx + 1)
                     argnames.append(argname)
-                    if isinstance(arg, tuple):
-                        argtypes.append(" CAST({0} AS {1})".format(
-                                                            argname, arg[1]))
-                        self.execute("SET {0}=%s".format(argname), (arg[0],))
-                    else:
-                        argtypes.append(argname)
-                        self.execute("SET {0}=%s".format(argname), (arg,))
+                    self.execute("SET {0}=%s".format(argname), (arg,))
 
             call = "CALL {0}({1})".format(procname, ','.join(argnames))
 
@@ -664,7 +640,7 @@ class MySQLCursor(CursorBase):
                     # pylint: enable=W0212
 
             if argnames:
-                select = "SELECT {0}".format(','.join(argtypes))
+                select = "SELECT {0}".format(','.join(argnames))
                 self.execute(select)
                 self._stored_results = results
                 return self.fetchone()

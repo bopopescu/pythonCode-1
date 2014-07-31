@@ -36,7 +36,7 @@ CONNECTION_POOL_LOCK = threading.RLock()
 CNX_POOL_ARGS = ('pool_name', 'pool_size', 'pool_cnx')
 CNX_POOL_MAXSIZE = 32
 CNX_POOL_MAXNAMESIZE = 64
-CNX_POOL_NAMEREGEX = re.compile(r'[^a-zA-Z0-9._:\-*$#]')
+CNX_POOL_NAMEREGEX = re.compile(r'[^a-zA-Z0-9._\-*$#]')
 
 
 def generate_pool_name(**kwargs):
@@ -103,14 +103,13 @@ class PooledMySQLConnection(object):
         The close() method does not close the connection with the
         MySQL server. The connection is added back to the pool so it
         can be reused.
-
-        When the pool is configured to reset the session, the session
-        state will be cleared by re-authenticating the user.
         """
         cnx = self._cnx
         if self._cnx_pool.reset_session:
-            cnx.reset_session()
-
+            # pylint: disable=W0212
+            cnx.cmd_change_user(cnx._user, cnx._password, cnx._database,
+                                cnx._charset_id)
+            # pylint: enable=W0212
         self._cnx_pool.add_connection(cnx)
         self._cnx = None
 
@@ -264,9 +263,9 @@ class MySQLConnectionPool(object):
 
             if not cnx:
                 cnx = MySQLConnection(**self._cnx_config)
-                # pylint: disable=W0201,W0212
+                # pylint: disable=W0212
                 cnx._pool_config_version = self._config_version
-                # pylint: enable=W0201,W0212
+                # pylint: enable=W0212
             else:
                 if not isinstance(cnx, MySQLConnection):
                     raise errors.PoolError(

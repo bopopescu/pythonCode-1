@@ -152,11 +152,10 @@ def get_exception(packet):
         (packet, errno) = utils.read_int(packet, 2)
         if packet[0] != '\x23':
             # Error without SQLState
-            errmsg = packet.decode('utf8')
+            errmsg = packet
         else:
             (packet, sqlstate) = utils.read_bytes(packet[1:], 5)
-            sqlstate = sqlstate.decode('utf8')
-            errmsg = packet.decode('utf8')
+            errmsg = packet
     except StandardError as err:
         return InterfaceError("Failed getting Error information (%r)" % err)
     else:
@@ -185,7 +184,7 @@ class Error(StandardError):
         if self.msg and self.errno != -1:
             fields = {
                 'errno': self.errno,
-                'msg': self.msg.encode('utf8')
+                'msg': self.msg
             }
             if self.sqlstate:
                 fmt = '{errno} ({state}): {msg}'
@@ -244,12 +243,8 @@ class NotSupportedError(DatabaseError):
 
 
 class PoolError(Error):
-    """Exception for errors relating to connection pooling"""
+    """Exception raise for errors relating to connection pooling"""
     pass
-
-
-class MySQLFabricError(Error):
-    """Exception for errors relating to MySQL Fabric"""
 
 _SQLSTATE_CLASS_EXCEPTION = {
     '02': DataError,  # no data

@@ -28,81 +28,74 @@ import struct
 import datetime
 from decimal import Decimal
 
-from mysql.connector.constants import (
-    FieldFlag, ServerCmd, FieldType, ClientFlag)
+try:
+    from hashlib import sha1
+except ImportError:
+    from sha import new as sha1
+
+from mysql.connector.constants import (FieldFlag, ServerCmd, FieldType)
 from mysql.connector import (errors, utils)
-from .authentication import get_auth_plugin
 
 
 class MySQLProtocol(object):
-
-    """Implements MySQL client/server protocol
-
-    Create and parses MySQL packets.
     """
-
-    def _connect_with_db(self, client_flags, database):
-        """Prepare database string for handshake response"""
-        if client_flags & ClientFlag.CONNECT_WITH_DB and database:
-            if isinstance(database, unicode):
-                return database.encode('utf8') + '\x00'
-            return database + '\x00'
-        return '\x00'
-
-    def _auth_response(self, client_flags, username, password, database,
-                       auth_plugin, auth_data, ssl_enabled):
-        """Prepare the authentication response"""
-        if not password:
-            return '\x00'
-
+    Implemets MySQL client/server protocol.
+    Creates and parse packets based on MySQL client/server protocol.
+    """
+    def _scramble_password(self, passwd, seed):
+        """Scramble a password ready to send to MySQL"""
+        hash4 = None
         try:
-            auth = get_auth_plugin(auth_plugin)(auth_data,
-                username=username, password=password, database=database,
-                ssl_enabled=ssl_enabled)
-            plugin_auth_response = auth.auth_response()
-        except (TypeError, errors.InterfaceError) as exc:
-            raise errors.ProgrammingError(
-                "Failed authentication: {0}".format(str(exc)))
+            hash1 = sha1(passwd).digest()
+            hash2 = sha1(hash1).digest()  # Password as found in mysql.user()
+            hash3 = sha1(seed + hash2).digest()
+            xored = [utils.intread(h1) ^ utils.intread(h3)
+                for (h1, h3) in zip(hash1, hash3)]
+            hash4 = struct.pack('20B', *xored)
+        except Exception as err:
+            raise errors.InterfaceError(
+                'Failed scrambling password; %s' % err)
 
-        if client_flags & ClientFlag.SECURE_CONNECTION:
-            resplen = len(plugin_auth_response)
-            auth_response = struct.pack('<B', resplen) + plugin_auth_response
+        return hash4
+
+    def _prepare_auth(self, usr, pwd, dbname, flags, seed):
+        """Prepare elements of the authentication packet"""
+
+        if usr is not None and len(usr) > 0:
+            if isinstance(usr, unicode):
+                usr = usr.encode('utf8')
+            _username = usr + '\x00'
         else:
-            auth_response = plugin_auth_response + '\x00'
-        return auth_response
+            _username = '\x00'
 
-    def make_auth(self, handshake, username=None, password=None, database=None,
+        if pwd is not None and len(pwd) > 0:
+            if isinstance(pwd, unicode):
+                pwd = pwd.encode('utf8')
+            _password = utils.int1store(20) +\
+                self._scramble_password(pwd, seed)
+        else:
+            _password = '\x00'
+
+        if dbname is not None and len(dbname):
+            _database = dbname.encode('utf8') + '\x00'
+        else:
+            _database = '\x00'
+
+        return (_username, _password, _database)
+
+    def make_auth(self, seed, username=None, password=None, database=None,
                   charset=33, client_flags=0,
-                  max_allowed_packet=1073741824, ssl_enabled=False,
-                  auth_plugin=None):
+                  max_allowed_packet=1073741824):
         """Make a MySQL Authentication packet"""
+        if not seed:
+            raise errors.ProgrammingError('Seed missing')
 
-        try:
-            auth_data = handshake['auth_data']
-            auth_plugin = auth_plugin or handshake['auth_plugin']
-        except (TypeError, KeyError) as exc:
-            raise errors.ProgrammingError(
-                "Handshake misses authentication info ({0})".format(exc))
-
-        if not username:
-            username = ''
-        elif isinstance(username, unicode):
-            username = username.encode('utf8')
-        packet = struct.pack('<IIB{filler}{usrlen}sx'.format(
-                filler='x'*23, usrlen=len(username)),
-            client_flags, max_allowed_packet, charset, username)
-
-        packet += self._auth_response(client_flags, username, password,
-                                      database,
-                                      auth_plugin,
-                                      auth_data, ssl_enabled)
-
-        packet += self._connect_with_db(client_flags, database)
-
-        if client_flags & ClientFlag.PLUGIN_AUTH:
-            packet += auth_plugin.encode('utf8') + '\x00'
-
-        return packet
+        auth = self._prepare_auth(username, password, database,
+                                  client_flags, seed)
+        return utils.int4store(client_flags) +\
+               utils.int4store(max_allowed_packet) +\
+               utils.int1store(charset) +\
+               '\x00' * 23 + auth[0] + auth[1] + auth[2]
 
     def make_auth_ssl(self, charset=33, client_flags=0,
                       max_allowed_packet=1073741824):
@@ -119,75 +112,33 @@ class MySQLProtocol(object):
             data += str(argument)
         return data
 
-    def make_change_user(self, handshake, username=None, password=None,
-                         database=None, charset=33, client_flags=0,
-                         ssl_enabled=False, auth_plugin=None):
+    def make_change_user(self, seed, username=None, password=None,
+                         database=None, charset=33, client_flags=0):
         """Make a MySQL packet with the Change User command"""
+        if not seed:
+            raise errors.ProgrammingError('Seed missing')
 
-        try:
-            auth_data = handshake['auth_data']
-            auth_plugin = auth_plugin or handshake['auth_plugin']
-        except (TypeError, KeyError) as exc:
-            raise errors.ProgrammingError(
-                "Handshake misses authentication info ({0})".format(exc))
-
-        if not username:
-            username = ''
-        elif isinstance(username, unicode):
-            username = username.encode('utf8')
-        packet = struct.pack('<B{usrlen}sx'.format(usrlen=len(username)),
-            ServerCmd.CHANGE_USER, username)
-
-        packet += self._auth_response(client_flags, username, password,
-                                      database,
-                                      auth_plugin,
-                                      auth_data, ssl_enabled)
-
-        packet += self._connect_with_db(client_flags, database)
-
-        packet += struct.pack('<H', charset)
-
-        if client_flags & ClientFlag.PLUGIN_AUTH:
-            packet += auth_plugin.encode('utf8') + '\x00'
-
-        return packet
+        auth = self._prepare_auth(username, password, database,
+                                  client_flags, seed)
+        data = utils.int1store(ServerCmd.CHANGE_USER) +\
+               auth[0] + auth[1] + auth[2] + utils.int2store(charset)
+        return data
 
     def parse_handshake(self, packet):
         """Parse a MySQL Handshake-packet"""
         res = {}
-        res['protocol'] = struct.unpack('<xxxxB', packet[0:5])[0]
+        (packet, res['protocol']) = utils.read_int(packet[4:], 1)
         (packet, res['server_version_original']) = utils.read_string(
-            packet[5:], end='\x00')
-
-        (res['server_threadid'],
-         auth_data1,
-         capabilities1,
-         res['charset'],
-         res['server_status'],
-         capabilities2,
-         auth_data_length
-         ) = struct.unpack('<I8sx2sBH2sBxxxxxxxxxx', packet[0:31])
-
-        packet = packet[31:]
-
-        capabilities = utils.intread(capabilities1 + capabilities2)
-
-        auth_data2 = ''
-        if capabilities & ClientFlag.SECURE_CONNECTION:
-            size = min(13, auth_data_length - 8) if auth_data_length else 13
-            auth_data2 = packet[0:size]
-            packet = packet[size:]
-            if auth_data2[-1] == '\x00':
-                auth_data2 = auth_data2[:-1]
-
-        if capabilities & ClientFlag.PLUGIN_AUTH:
-            (packet, res['auth_plugin']) = utils.read_string(
-                packet, end='\x00')
-        else:
-            res['auth_plugin'] = 'mysql_native_password'
-
-        res['auth_data'] = auth_data1 + auth_data2
-        res['capabilities'] = capabilities
+            packet, end='\x00')
+        (packet, res['server_threadid']) = utils.read_int(packet, 4)
+        (packet, res['scramble']) = utils.read_bytes(packet, 8)
+        packet = packet[1:]  # Filler 1 * \x00
+        (packet, res['capabilities']) = utils.read_int(packet, 2)
+        (packet, res['charset']) = utils.read_int(packet, 1)
+        (packet, res['server_status']) = utils.read_int(packet, 2)
+        packet = packet[13:]  # Filler 13 * \x00
+        (packet, scramble_next) = utils.read_bytes(packet, 12)
+        res['scramble'] += scramble_next
         return res
 
     def parse_ok(self, packet):
@@ -582,7 +533,7 @@ class MySQLProtocol(object):
         return (packed, field_type)
 
     def _prepare_stmt_send_long_data(self, statement, param, data):
-        """Prepare long data for prepared statements
+        """Prepare long data for prepared statments
 
         Returns a string.
         """
@@ -662,23 +613,3 @@ class MySQLProtocol(object):
             ''.join(values)
             )
         return ''.join(packet)
-
-    def parse_auth_switch_request(self, packet):
-        """Parse a MySQL AuthSwitchRequest-packet"""
-        if not packet[4] == '\xfe':
-            raise errors.InterfaceError(
-                "Failed parsing AuthSwitchRequest packet")
-
-        (packet, plugin_name) = utils.read_string(packet[5:], end='\x00')
-        if packet[-1] == '\x00':
-            packet = packet[:-1]
-
-        return plugin_name, packet
-
-    def parse_auth_more_data(self, packet):
-        """Parse a MySQL AuthMoreData-packet"""
-        if not packet[4] == '\x01':
-            raise errors.InterfaceError(
-                "Failed parsing AuthMoreData packet")
-
-        return packet[5:]
