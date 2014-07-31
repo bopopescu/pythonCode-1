@@ -48,7 +48,7 @@ class Player:
         {
             "Name":     "%(__name__)s",
             "ID":       "%(__id__)s",
-            "Position": %(__position__)s
+            "Position": %(__position__)s,
             "Damage":   %(__damage__)f
         }
                    """
