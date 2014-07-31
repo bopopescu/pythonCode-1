@@ -45,7 +45,8 @@ class SocketMaintainer(object):
         '''
         #Check if already a waiting player exists 
         waitingPlayer = self.__searchForConnections(Consts.WAITFORPLAYER, socketId)
-        
+        #Send the own player object to the client
+        self.__connectedClients[socketId].send_message("%s:%s" % (Consts.PLAYER, self.__connectedClients[socketId].getPlayerObject().getJSON()))
         #Check if it possible to start a game
         if waitingPlayer is None:
             self.__connectedClients[socketId].send_message(Consts.WAITFORPLAYERMESSAGE)

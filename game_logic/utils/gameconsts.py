@@ -39,6 +39,7 @@ class Consts:
     WAITFORPLAYERMESSAGE = "WaitForPlayer"
     PLAYERAVAILABLE = "PlayerAvailable"
     GAMEDATA = "GameData"
+    PLAYER = "Player"
     PLAYER1 = "Player1"
     PLAYER2 = "Player2"
     FIRED = "Fired"
