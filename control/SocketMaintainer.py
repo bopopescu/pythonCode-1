@@ -78,41 +78,14 @@ class SocketMaintainer(object):
         match = MatchBuilder.get_match([player1, player2]) # TODO: Handle with static constants
         
         #Inform the clients about the starting match
-        playerSockets[0].matchStarted(match, player2.name)
-        playerSockets[1].matchStarted(match, player1.name)
+        playerSockets[0].matchStarted(match)
+        playerSockets[1].matchStarted(match)
         
         #Send the game data
         for socket in playerSockets:
             coordinates = ",".join(str(value) for value in match.horizonSkeletonPoints)
             
-            socket.send_message("%s: %s" % (Consts.PLAYER1, self.__createJSONForPlayerObject(player1.name, player1SocketId,  match.getPlayerPostion(player1))))
-            socket.send_message("%s: %s" % (Consts.PLAYER2, self.__createJSONForPlayerObject(player2.name, player2SocketId,  match.getPlayerPostion(player2))))
+            socket.send_message("%s: %s" % (Consts.PLAYER1, player1.getJSON()))
+            socket.send_message("%s: %s" % (Consts.PLAYER2, player2.getJSON()))
             
             socket.send_message("%s:[%s]" % (Consts.MAPHORIZON, coordinates))
-    
-    
-    
-    
-    
-    
-    def __createJSONForPlayerObject (self, playerName, playerSocketId, positon):
-        '''
-        Function which will create a JSON Object for the Player
-        '''
-        
-        template = """
-        {
-            "Name":     "%(__name__)s",
-            "ID":       "%(__id__)s",
-            "Position": %(__position__)s
-        }
-                   """
-                   
-        subst = {
-                 "__name__"     : playerName,
-                 "__id__"       : playerSocketId,
-                 "__position__" : str(positon)
-                 }
-        
-        
-        return template % subst

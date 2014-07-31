@@ -85,12 +85,13 @@ class GameSocketHandler(WebSocketsHandler):
             self.close()
             
     
-    def matchStarted (self, match, oponentName):
+    def matchStarted (self, match):
         '''
         Function called, when a Match is started
         '''
         self.__match = match
         self.__state = Consts.GAMERUNNING
+        self.__playerObject.setMatch(match)
         
         self.send_message("%s" % (Consts.PLAYERAVAILABLE))
     
@@ -139,7 +140,7 @@ class GameSocketHandler(WebSocketsHandler):
                         "Y": "%(__Y__)i",
                         "T": "%(__T__).4f",
                         "Percent": "%(__percent__).4f",
-                        "PlayerID": "%(__playerID__)s"
+                        "Player": "%(__player__)s" #TODO: Send the player object instead of an id
                     }
                     """
         
@@ -148,16 +149,16 @@ class GameSocketHandler(WebSocketsHandler):
         #Create the hit Objects
         for hit in flightPath.hits:
             if hit.target is None:
-                target = ""
+                target = "\"\""
             else:
-                target = hit.target.name
+                target = target.getJSON()
             
             subst = {
                      "__X__" : hit.x,
                      "__Y__" : hit.y,
                      "__T__" : hit.t,
                      "__percent__" : hit.percent,
-                     "__playerID__" : target
+                     "__player__" : target
                      }
             
             hitObjects.append(hitObject % subst)
