@@ -7,6 +7,8 @@ from control.sockets.websocketserver import WebSocketsHandler
 from control.SocketMaintainer import SocketMaintainer
 from game_logic.utils.gameconsts import Consts
 from game_logic.model.player import Player
+from mysql.connector import Connect
+from mysql.MySQLConfig import MySQLConfig
 import random
 import time
 import json
@@ -118,6 +120,13 @@ class GameSocketHandler(WebSocketsHandler):
          
         #Change the player in the match
         self.__match.activePlayer = self.__foundNextPlayer(self.__playerObject)
+        
+        #Check if it was the last the turn and one player wins
+        winner = self.__playerFinishedGame()
+        
+        #Add entry to the MYSQL database if a winner exists
+        if winner is not None:
+            self.__addEntryToHighscore(winner)
          
     
     def __createJSON (self, flightPath):
@@ -191,6 +200,51 @@ class GameSocketHandler(WebSocketsHandler):
             
         return self.__match.players[i] 
 
+    
+    def __playerFinishedGame (self):
+        '''
+        Function which will check if an player finished the game
+        @return: None, if no player finished the game, the player object of the player which finished the game
+        '''
+        winner = None
+        counter = 0
+        for player in self.__match.players:
+            if player.damage > 0:
+                counter = counter + 1
+                winner = player
+        
+        if counter == 1:
+            return winner
+        else:
+            return None
+
+    def __addEntryToHighscore (self, winner):
+        '''
+        Function which will add an entry to the MYSQL database
+        ''' 
+        try:
+            stmtTemplate = """
+                           INSERT INTO 
+                               highscore(playerName, points)
+                           VALUES 
+                               ('%s',1)
+                           ON DUPLICATE KEY
+                               UPDATE points = points + 1
+                           """
+           
+            stmt = stmtTemplate % (winner.name)
+            
+            #Connect to the database
+            db = Connect(**MySQLConfig.dbinfo())
+            cursor = db.cursor()
+            cursor.execute(stmt)
+            db.commit()
+            
+            cursor.close()
+            db.close()
+        except Exception, ex:
+            print "WARNING: An error occurred during the adding of the player to the highscore: %s" % str(ex)
+        
     
     def close (self):
         '''
