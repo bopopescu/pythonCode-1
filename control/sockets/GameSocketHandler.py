@@ -112,7 +112,6 @@ class GameSocketHandler(WebSocketsHandler):
         
         message = self.__createJSON(flightPath)
         
-        
         #Send the result to the clients
         messageString = "%s:%s" % (Consts.FIRED, message)
         
@@ -146,11 +145,11 @@ class GameSocketHandler(WebSocketsHandler):
         
         hitObject = """
                     {
-                        "X": "%(__X__)i",
-                        "Y": "%(__Y__)i",
-                        "T": "%(__T__).4f",
-                        "Percent": "%(__percent__).4f",
-                        "Player": "%(__player__)s" #TODO: Send the player object instead of an id
+                        "X": %(__X__)i,
+                        "Y": %(__Y__)i,
+                        "T": %(__T__).4f,
+                        "Percent": %(__percent__).4f,
+                        "Player": %(__player__)s
                     }
                     """
         
@@ -161,7 +160,7 @@ class GameSocketHandler(WebSocketsHandler):
             if hit.target is None:
                 target = "\"\""
             else:
-                target = target.getJSON()
+                target = hit.target.getJSON()
             
             subst = {
                      "__X__" : hit.x,
@@ -210,7 +209,7 @@ class GameSocketHandler(WebSocketsHandler):
         winner = None
         counter = 0
         for player in self.__match.players:
-            if player.damage > 0:
+            if player.damage < 1:
                 counter = counter + 1
                 winner = player
         
