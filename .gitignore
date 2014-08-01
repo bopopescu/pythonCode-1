@@ -52,3 +52,9 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+client/berg.jpg
+client/ecke.jpg
+client/game.js
+client/index.html
+client/map.css
+client/map.js
