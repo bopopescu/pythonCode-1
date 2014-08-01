@@ -43,6 +43,7 @@ class GameSocketHandler(WebSocketsHandler):
         '''
         Overwritten function called, when a data is to handle
         '''
+        # REMOVE FOR DEBUG
         try:
             while self.__keepAlive:
                 if not self.handshake_done:
