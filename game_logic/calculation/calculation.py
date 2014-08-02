@@ -51,15 +51,29 @@ class Calculation:
                 hit = self.__calc_target_hit(flugbahn, player)
                 flugbahn.setHit(hit)
 
+        for hit in flugbahn.hits:
+                hit.target.add_damage(hit.percent)
+
         # Flugbahn kürzen, endet beim ersten Treffer!
         if len(flugbahn.hits) > 0:
-            flugbahn.time_points = flugbahn.time_points[:int(flugbahn.hits[0].t / Consts.TIME_RESOLUTION)]
+            flugbahn.time_points = flugbahn.time_points[:int(round(flugbahn.hits[0].t / Consts.TIME_RESOLUTION))]
         return flugbahn
+
+    def __point_is_in_world(self, point):
+        return point.y > 0 and self.__x_is_in_world(int(round(point.x)))
+
+    def __x_is_in_world(self, x_pos):
+        return x_pos > 0 and x_pos < Consts.WORLD_WIDTH
 
     def __is_horizon_hit(self, bullet_pos):
         # Horizonttreffer am Rand des Geschosses oder in doch erst in der Mitte ?
         # TODO: Horizonthöhe berechnen / interpolieren?
-        return bullet_pos.y < self.__horizon[int(bullet_pos.x)]
+        pos_x = int(round(bullet_pos.x))
+        # Überprüfung ist eigentlich redundant
+        if self.__x_is_in_world(pos_x):
+            return bullet_pos.y <= self.__horizon[pos_x].y
+        else:
+            return False
         # return bullet_pos.y - Consts.BULLET_RADIUS < self.__horizon[int(round(bullet_pos.x))]
 
     def __calc_target_hit_percent(self, target_pos, bullet_pos):
@@ -127,12 +141,12 @@ class Calculation:
         point = self.__calc_pos(t, source_pos, angle, speed)
         result.time_points.append(point)
 
-        while int(point.x) < Consts.WORLD_WIDTH and (point.y > 0)  and (not self.__is_horizon_hit(point)):
-            t += Consts.TIME_RESOLUTION
-            point = self.__calc_pos(t, source_pos, angle, speed)
-            if point.y > result.max_y_point.y:
-                result.max_y_point = point
-            result.time_points.append(point)
+        while self.__point_is_in_world(point) and not self.__is_horizon_hit(point):
+                t += Consts.TIME_RESOLUTION
+                point = self.__calc_pos(t, source_pos, angle, speed)
+                if point.y > result.max_y_point.y:
+                    result.max_y_point = point
+                result.time_points.append(point)
 
         return result
 

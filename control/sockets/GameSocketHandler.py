@@ -44,14 +44,14 @@ class GameSocketHandler(WebSocketsHandler):
         Overwritten function called, when a data is to handle
         '''
         # REMOVE FOR DEBUG
-        try:
-            while self.__keepAlive:
-                if not self.handshake_done:
-                    self.handshake()
-                else:
-                    self.read_next_message()
-        except Exception, ex:
-            self.__handleError(ex)
+        # try:
+        while self.__keepAlive:
+            if not self.handshake_done:
+                self.handshake()
+            else:
+                self.read_next_message()
+        # except Exception, ex:
+        #     self.__handleError(ex)
     
     def send_message(self, message):
         try:
@@ -177,7 +177,7 @@ class GameSocketHandler(WebSocketsHandler):
         subst = {
                      "__startPoint__" : str(flightPath.start_point),
                      "__maxYPoint__" : str(flightPath.max_y_point),
-                     "__timePoints__" : ",".join(str(x) for x in flightPath.time_points),
+                     "__timePoints__" : ",".join(str(x) for x in flightPath.time_points[::Consts.DIVIDER_CLIENT_DATA]),
                      "__hits__" : ",".join(hitObjects)
                 }
         

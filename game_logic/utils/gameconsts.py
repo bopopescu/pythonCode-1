@@ -11,9 +11,10 @@ class Consts:
     MIN_SAMPLING_POINTS = 10 # minimale Anzahl Stuetzstellen f. Horizont
     MAX_SAMPLING_POINTS = 30 # maximale Anzahl Stuetzstellen f. Horizont
     GAP_TO_FIRST_SAMPLING_POINT = 0 # Abstand bis zur ersten / letzten Stuetzstelle
-    MAX_DERIVATION = 3 # max. Höhe der Ableitung bzw. Steigung des Horizonts
+    MAX_DERIVATION = 1 # max. Höhe der Ableitung bzw. Steigung des Horizonts
 
     TIME_RESOLUTION = 0.0009
+    DIVIDER_CLIENT_DATA = 10
     # 0.001  reicht fuer 99,47% Treffer bei senkrechtem Schuss
     # 0.0009 reicht fuer 99,63% Treffer bei senkrechtem Schuss
 
