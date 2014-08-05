@@ -1,6 +1,4 @@
 # coding=utf-8
-from idlelib.run import flush_stdout
-
 __author__ = 'M'
 
 import math

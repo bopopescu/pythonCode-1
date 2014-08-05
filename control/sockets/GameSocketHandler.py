@@ -44,14 +44,14 @@ class GameSocketHandler(WebSocketsHandler):
         Overwritten function called, when a data is to handle
         '''
         # REMOVE FOR DEBUG
-        # try:
-        while self.__keepAlive:
-            if not self.handshake_done:
-                self.handshake()
-            else:
-                self.read_next_message()
-        # except Exception, ex:
-        #     self.__handleError(ex)
+        try:
+            while self.__keepAlive:
+                if not self.handshake_done:
+                    self.handshake()
+                else:
+                    self.read_next_message()
+        except Exception, ex:
+            self.__handleError(ex)
     
     def send_message(self, message):
         try:
@@ -251,9 +251,22 @@ class GameSocketHandler(WebSocketsHandler):
         Function which will close the connection
         '''
         print "Close connection"
+        
+        #check if a match is running
+        if self.__match is not None:
+            self.__informAboutClosedConnection(self.__match)
+        
         self.__keepAlive=False
         self.request.close()
         
+    def __informAboutClosedConnection (self, match):
+        '''
+        Function which will inform the other clients, that one client lost the connection
+        '''
+        
+        for player in match.players:
+            if player != self.__playerObject:
+                player.socket.send_message("%s:%s" % (Consts.CONNECTIONLOST, player.getJSON()))
         
 
     #Getter + Setter Methods

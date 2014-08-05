@@ -58,3 +58,10 @@ client/game.js
 client/index.html
 client/map.css
 client/map.js
+client/TankCommander/berg.jpg
+client/TankCommander/ecke.jpg
+client/TankCommander/explosion.gif
+client/TankCommander/game.js
+client/TankCommander/index.html
+client/TankCommander/map.css
+client/TankCommander/map.js

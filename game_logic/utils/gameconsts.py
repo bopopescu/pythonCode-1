@@ -46,3 +46,4 @@ class Consts:
     FIRED = "Fired"
     MAPHORIZON = "MapHorizon"
     WRONGTURN = "WrongTurn"
+    CONNECTIONLOST = "PlayerLostConnection"
