@@ -144,7 +144,8 @@ class Calculation:
                 point = self.__calc_pos(t, source_pos, angle, speed)
                 if point.y > result.max_y_point.y:
                     result.max_y_point = point
-                result.time_points.append(point)
+                if point.y < Consts.WORLD_HEIGHT:
+                    result.time_points.append(point)
 
         return result
 
