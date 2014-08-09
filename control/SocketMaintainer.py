@@ -88,5 +88,5 @@ class SocketMaintainer(object):
             
             socket.send_message("%s: %s" % (Consts.PLAYER1, player1.getJSON()))
             socket.send_message("%s: %s" % (Consts.PLAYER2, player2.getJSON()))
-            
+            socket.send_message("%s: %s" % (Consts.PLAYERBEGINS, match.activePlayer.getJSON()))
             socket.send_message("%s:[%s]" % (Consts.MAPHORIZON, coordinates))

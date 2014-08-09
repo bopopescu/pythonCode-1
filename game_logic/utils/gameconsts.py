@@ -44,6 +44,7 @@ class Consts:
     PLAYER = "Player"
     PLAYER1 = "Player1"
     PLAYER2 = "Player2"
+    PLAYERBEGINS = "PlayerBegins"
     FIRED = "Fired"
     MAPHORIZON = "MapHorizon"
     WRONGTURN = "WrongTurn"
