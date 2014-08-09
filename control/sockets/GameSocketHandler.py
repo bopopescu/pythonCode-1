@@ -266,7 +266,7 @@ class GameSocketHandler(WebSocketsHandler):
         
         for player in match.players:
             if player != self.__playerObject:
-                player.socket.send_message("%s:%s" % (Consts.CONNECTIONLOST, player.getJSON()))
+                player.socket.send_message("%s:%s" % (Consts.CONNECTIONLOST, self.__playerObject.getJSON()))
         
 
     #Getter + Setter Methods
