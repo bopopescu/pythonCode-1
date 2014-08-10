@@ -82,7 +82,14 @@ class MatchBuilder:
         """
         MatchBuilder.f_random.seed()
         world_width = Consts.WORLD_WIDTH
-        match = Match(players, world_width, MatchBuilder.__get_new_horizon_skeleton(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
+
+        player_order = range(len(players))
+        MatchBuilder.f_random.shuffle(player_order)
+        ordered_players = []
+        for i in player_order:
+            ordered_players += [players[i]]
+
+        match = Match(ordered_players, world_width, MatchBuilder.__get_new_horizon_skeleton(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
 
         for player in players:
             player.match = match
