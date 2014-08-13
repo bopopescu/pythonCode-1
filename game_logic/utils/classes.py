@@ -39,11 +39,18 @@ class Rect:
         self.bottomRight  = bottom_right
 
 class Flugbahn:
-    def __init__(self, start_point, max_y_point = TimePoint(0,0,0), time_points = [], hits = list()):
-        self.start_point = start_point
+    def __init__(self, origin, max_y_point = TimePoint(0,0,0), time_points = [], hits = list()):
+        self.origin = origin
         self.time_points = time_points
         self.max_y_point = max_y_point
         self.hits = hits
+
+    @property
+    def start_point(self):
+        if self.origin:
+            return self.origin.getPosition()
+        else:
+            return None
 
     def setHit(self, hit):
         if hit:

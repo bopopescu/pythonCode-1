@@ -9,6 +9,7 @@ class Player:
         self.__damage = 0
         self.__match = None
 
+        self.angle = 0.0
 
     def getMatch (self):
         return self.__match
@@ -41,7 +42,7 @@ class Player:
     def socket (self):
         return self.__socket
 
-    def position(self):
+    def getPosition(self):
         if self.__match.getPlayerPostion(self):
             return self.__match.getPlayerPostion(self)
         else:
@@ -57,20 +58,22 @@ class Player:
             "Name":     "%(__name__)s",
             "ID":       "%(__id__)s",
             "Position": %(__position__)s,
-            "Damage":   %(__damage__)f
+            "Damage":   %(__damage__)f,
+            "Angle":   %(__angle__)f
         }
                    """
     
         if self.__match == None:
             position = "\"\""
         else:
-            position = str(self.position())
+            position = str(self.getPosition())
         
         subst = {
                  "__name__"     : self.__name,
                  "__id__"       : self.__socket.getSocketId(),
                  "__position__" : position,
-                 "__damage__"   : self.damage
+                 "__damage__"   : self.damage,
+                 "__angle__"   : self.angle
                  }
         
         

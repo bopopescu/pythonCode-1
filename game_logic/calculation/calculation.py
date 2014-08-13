@@ -39,9 +39,10 @@ class Calculation:
             Hit[0..1]: Treffer der Targets
         """
 
+        source.angle = angle # für Client zur Anzeige des Geschützwinkels
         source_pos = self.__player_positions[source]
 
-        flugbahn = self.__calc_flugbahn(source_pos, angle, speed)
+        flugbahn = self.__calc_flugbahn(source, angle, speed)
 
         for player in self.__players:
             if not player is source:
@@ -125,7 +126,7 @@ class Calculation:
         else:
             return None
 
-    def __calc_flugbahn(self, source_pos, angle, speed):
+    def __calc_flugbahn(self, source, angle, speed):
         """
         Berechnet die Flugbahn bis zum ersten Treffer des Horizonts
         :param source_pos: Abschusspos. (Mitte Panzer)
@@ -133,8 +134,9 @@ class Calculation:
         :param speed: Abschussgeschwindigkeit (m/s)
         :return: Flugbahn(source_pos, time_points, targets = None)
         """
-        result = Flugbahn(source_pos, TimePoint(0,0,0), [], list())
+        result = Flugbahn(source, TimePoint(0,0,0), [], list())
 
+        source_pos = source.getPosition()
         t = Consts.TIME_RESOLUTION
         point = self.__calc_pos(t, source_pos, angle, speed)
         result.time_points.append(point)
