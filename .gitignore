@@ -66,3 +66,12 @@ client/TankCommander/index.html
 client/TankCommander/map.css
 client/TankCommander/map.js
 /.idea
+client/TankCommander.zip
+client/TankCommander/css/map.css
+client/TankCommander/img/berg.jpg
+client/TankCommander/img/ecke.jpg
+client/TankCommander/img/explosion.gif
+client/TankCommander/img/scala.png
+client/TankCommander/img/tank.png
+client/TankCommander/js/game.js
+client/TankCommander/js/map.js
