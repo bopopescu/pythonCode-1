@@ -55,7 +55,11 @@ class Calculation:
 
         # Flugbahn kürzen, endet beim ersten Treffer!
         if len(flugbahn.hits) > 0:
-            flugbahn.time_points = flugbahn.time_points[:int(round(flugbahn.hits[0].t / Consts.TIME_RESOLUTION))]
+            for i in xrange(1,len(flugbahn.time_points)-1): # einzeln durchgehen, zwischendurch können welche fehlen...
+                if flugbahn.time_points[i].t > flugbahn.hits[0].t:
+                    flugbahn.time_points = flugbahn.time_points[:i-1]
+                    break
+
         return flugbahn
 
     def __point_is_in_world(self, point):
@@ -74,6 +78,9 @@ class Calculation:
         else:
             return False
         # return bullet_pos.y - Consts.BULLET_RADIUS < self.__horizon[int(round(bullet_pos.x))]
+
+    def __is_out_of_radius(self, origin, point):
+        return Consts.PLAYER_RADIUS < math.hypot(origin.x - point.x, origin.y - point.y)
 
     def __calc_target_hit_percent(self, target_pos, bullet_pos):
         # kürzesten Abstand zwischen Ziel und Geschossmittelpunkt mit Pytagoras ermitteln
@@ -146,7 +153,8 @@ class Calculation:
                 point = self.__calc_pos(t, source_pos, angle, speed)
                 if point.y > result.max_y_point.y:
                     result.max_y_point = point
-                if point.y < Consts.WORLD_HEIGHT:
+                if point.y <= Consts.WORLD_HEIGHT+Consts.BULLET_RADIUS and \
+                    self.__is_out_of_radius(source_pos, point): # darf / muss drüber gehen
                     result.time_points.append(point)
 
         return result
