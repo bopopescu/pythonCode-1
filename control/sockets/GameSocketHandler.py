@@ -136,6 +136,7 @@ class GameSocketHandler(WebSocketsHandler):
         #Define format values
         message = """
                   {
+                      "Origin": %(__origin__)s,
                       "StartPoint": %(__startPoint__)s,
                       "MaxYPoint":  %(__maxYPoint__)s,
                       "TimePoints": [%(__timePoints__)s],
@@ -175,6 +176,7 @@ class GameSocketHandler(WebSocketsHandler):
         
         #Create the json Template
         subst = {
+                     "__origin__" : flightPath.origin.getJSON(),
                      "__startPoint__" : str(flightPath.start_point),
                      "__maxYPoint__" : str(flightPath.max_y_point),
                      "__timePoints__" : ",".join(str(x) for x in flightPath.time_points[::Consts.DIVIDER_CLIENT_DATA]),
