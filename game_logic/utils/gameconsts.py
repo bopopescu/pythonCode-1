@@ -36,6 +36,7 @@ class Consts:
     PLAYERNAME = "name"
     ANGLE = "angle"
     POWER = "power"
+    MESSAGE = "Message"
     
     #outgoing
     WAITFORPLAYERMESSAGE = "WaitForPlayer"
