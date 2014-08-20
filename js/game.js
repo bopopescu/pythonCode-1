@@ -69,7 +69,7 @@ function socketCommunication(){
 	require(['dojox/socket'], function (Socket) {
 		addLogLine("Try to reach server...",orange.Full,"logList");
 		//Create Socket
-		socket = new Socket("ws://localhost:80");
+		socket = new Socket("ws://localhost:9999");
 		//socket = new Socket("ws://w3bs.de:9999");
 		
 		//Bei Fehler abbrechen			

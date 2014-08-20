@@ -6,7 +6,7 @@ Created on 10.07.2014
 import SocketServer
 from control.sockets.GameSocketHandler import GameSocketHandler
 
-
+'''Hauptschleife'''
 if __name__ == '__main__':
     server = SocketServer.ThreadingTCPServer(("", 9999), GameSocketHandler)
     server.allow_reuse_address = True
