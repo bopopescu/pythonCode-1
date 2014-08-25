@@ -57,7 +57,7 @@ def _prepare_packets(buf, pktnr):
                     + buf[:maxpktlen])
         buf = buf[maxpktlen:]
         buflen = len(buf)
-        pktnr = pktnr + 1
+        pktnr += 1
     pkts.append(struct.pack('<I', buflen)[0:3]
                 + struct.pack('<B', pktnr) + buf)
     return pkts
@@ -81,7 +81,7 @@ class BaseMySQLSocket(object):
     @property
     def next_packet_number(self):
         """Generates the next packet number"""
-        self._packet_number = self._packet_number + 1
+        self._packet_number += 1
         if self._packet_number > 255:
             self._packet_number = 0
         return self._packet_number
@@ -140,7 +140,7 @@ class BaseMySQLSocket(object):
                          + '\x00\x40\x00' + zbuf)
             tmpbuf = tmpbuf[16384:]
             pllen = len(tmpbuf)
-            seqid = seqid + 1
+            seqid += 1
             while pllen > maxpktlen:
                 zbuf = zlib.compress(tmpbuf[:maxpktlen])
                 zpkts.append(struct.pack('<I', len(zbuf))[0:3]
@@ -148,7 +148,7 @@ class BaseMySQLSocket(object):
                              + '\xff\xff\xff' + zbuf)
                 tmpbuf = tmpbuf[maxpktlen:]
                 pllen = len(tmpbuf)
-                seqid = seqid + 1
+                seqid += 1
             if tmpbuf:
                 zbuf = zlib.compress(tmpbuf)
                 zpkts.append(struct.pack('<I', len(zbuf))[0:3]

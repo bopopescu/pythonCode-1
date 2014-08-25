@@ -192,7 +192,7 @@ class GameSocketHandler(WebSocketsHandler):
         
         i=0
         for player in self.__match.players:
-            i = i + 1
+            i += 1
             if player == currentPlayer:
                 break
                 
@@ -212,7 +212,7 @@ class GameSocketHandler(WebSocketsHandler):
         counter = 0
         for player in self.__match.players:
             if player.damage < 1:
-                counter = counter + 1
+                counter += 1
                 winner = player
         
         if counter == 1:

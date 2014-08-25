@@ -831,7 +831,7 @@ class MySQLConnection(object):
         """
         counter = 0
         while counter != attempts:
-            counter = counter + 1
+            counter += 1
             try:
                 self.disconnect()
                 self.connect()

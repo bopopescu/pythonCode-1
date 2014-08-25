@@ -40,7 +40,6 @@ class Calculation:
         """
 
         source.angle = angle # für Client zur Anzeige des Geschützwinkels
-        source_pos = self.__player_positions[source]
 
         flugbahn = self.__calc_flugbahn(source, angle, speed)
 
@@ -66,7 +65,7 @@ class Calculation:
         return point.y > 0 and self.__x_is_in_world(int(round(point.x)))
 
     def __x_is_in_world(self, x_pos):
-        return x_pos > 0 and x_pos < Consts.WORLD_WIDTH
+        return 0 < x_pos < Consts.WORLD_WIDTH
 
     def __is_horizon_hit(self, bullet_pos):
         # Horizonttreffer am Rand des Geschosses oder in doch erst in der Mitte ?
@@ -117,7 +116,7 @@ class Calculation:
             #     abschussPhase = False
             # zuerst grob prüfen, ob Zielrechteck getroffen wurde
             # (not abschussPhase) and
-            if point.x > target_rect.topLeft.x and point.x <= target_rect.bottomRight.x and \
+            if target_rect.topLeft.x < point.x <= target_rect.bottomRight.x and \
                 point.y <= target_rect.topLeft.y and point.y >= target_rect.bottomRight.y:
                 # X und Y des Geschosses im Zielrechteck, Treffer anhand der Umkreise genauer prüfen
                 # Maximalwert zurückgeben
@@ -172,6 +171,8 @@ class Calculation:
         #->
         #s_x = cos(phi)*v_0*t
         #s_y = sin(phi) * v_0 * t -0.5* g * t^2
-        return TimePoint(source_pos.x + math.cos(angle) * speed * t, \
-                     source_pos.y + math.sin(angle) * speed * t -0.5 * Consts.g * math.pow(t,2), \
-                     t)
+        return TimePoint(source_pos.x + math.cos(angle) * speed * t,
+                     source_pos.y + math.sin(angle) * speed * t -0.5 * Consts.g * math.pow(t,2), t)
+
+
+

@@ -37,7 +37,7 @@ class WebSocketsHandler(SocketServer.StreamRequestHandler):
         length = len(message)
         if length <= 125:
             self.request.send(chr(length))
-        elif length >= 126 and length <= 65535:
+        elif 126 <= length <= 65535:
             self.request.send(chr(126))
             self.request.send(struct.pack(">H", length))
         else:

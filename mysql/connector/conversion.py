@@ -257,7 +257,7 @@ class MySQLConverter(MySQLConverterBase):
         """
         (hours, remainder) = divmod(value.seconds, 3600)
         (mins, secs) = divmod(remainder, 60)
-        hours = hours + (value.days * 24)
+        hours += value.days * 24
         if value.microseconds:
             return '%02d:%02d:%02d.%06d' % (hours, mins, secs,
                                             value.microseconds)

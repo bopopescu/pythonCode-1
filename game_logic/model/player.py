@@ -43,7 +43,7 @@ class Player:
         return self.__socket
 
     def getPosition(self):
-        if self.__match.getPlayerPostion(self):
+        if self.__match and self.__match.getPlayerPostion(self):
             return self.__match.getPlayerPostion(self)
         else:
             return None
@@ -63,7 +63,7 @@ class Player:
         }
                    """
     
-        if self.__match == None:
+        if self.__match is None:
             position = "\"\""
         else:
             position = str(self.getPosition())

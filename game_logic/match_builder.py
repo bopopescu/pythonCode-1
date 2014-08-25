@@ -1,4 +1,4 @@
-# coding=utf-8
+#coding=utf-8
 __author__ = 'M'
 
 import random
@@ -15,29 +15,25 @@ class MatchBuilder:
     def __get_new_horizon_skeleton(world_width):
         MatchBuilder.f_random.seed()
 
-        points = []
         MAX_LOOPS = 9000
-
-        points_count = MatchBuilder.f_random.randint(Consts.MIN_SAMPLING_POINTS, Consts.MAX_SAMPLING_POINTS)
         num_loops = 0
+        points = []
+        points_count = MatchBuilder.f_random.randint(Consts.MIN_SAMPLING_POINTS, Consts.MAX_SAMPLING_POINTS)
 
-        # Anfang und Ende setzen - inkonsistent, bad smell!
-        points.append(Point(0,
-                      MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
-        points.append(Point(world_width - 1,
-                      MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
+        points.append(Point(0, MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
+        points.append(Point(world_width - 1, MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
 
         max_x = world_width - 2
 
         while len(points) < points_count  and num_loops < MAX_LOOPS:
             num_loops += 1
             points.append(Point(MatchBuilder.f_random.randint(1, max_x),
-                          MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT, Consts.MAX_HORIZON_HEIGHT)))
+                          MatchBuilder.f_random.randint(Consts.MIN_HORIZON_HEIGHT,
+                                                        Consts.MAX_HORIZON_HEIGHT)))
 
             points.sort(key= lambda point: point.x)
 
             start_point = points[0]
-            is_valid = True
             for point in points[1::]:
                 if point.x == start_point.x:
                     points.remove(point)
@@ -48,14 +44,8 @@ class MatchBuilder:
                             points.remove(start_point)
                         else:
                             points.remove(point)
-                        # is_valid = False
-                        # MatchBuilder.f_random.seed()
-                        # break
                     else:
                         start_point = point
-
-        #TODO Random wieder aktivieren
-        # points = [Point(0,0), Point(100,100), Point(500,100), Point(world_width-1, 0)]
 
         return points
 
@@ -91,9 +81,11 @@ class MatchBuilder:
         for i in player_order:
             ordered_players += [players[i]]
 
-        match = Match(ordered_players, world_width, MatchBuilder.__get_new_horizon_skeleton(world_width), MatchBuilder.__get_new_player_x_positions(players, world_width))
+        match = Match(ordered_players, world_width, MatchBuilder.__get_new_horizon_skeleton(world_width),
+                      MatchBuilder.__get_new_player_x_positions(players, world_width))
 
         for player in players:
-            player.match = match
+            player.setMatch(match)
 
         return match
+

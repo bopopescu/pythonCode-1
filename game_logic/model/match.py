@@ -28,7 +28,8 @@ class Match:
         self.__calculation = Calculation(world_width, self.__horizon, players, self.__player_positions)
     
 
-    def __get_new_horizon(self, horizon_skeleton_points):
+    @staticmethod
+    def __get_new_horizon(horizon_skeleton_points):
 
         result = []
         start_point = horizon_skeleton_points[0]
@@ -44,13 +45,13 @@ class Match:
 
     @property
     def calculation(self):
-        return  self.__calculation
+        return self.__calculation
 
     def __str__(self):
         result = ''
         for player, pos in self.__player_positions.items():
             if len(result) > 0:
-                result = result +'\n'
+                result += '\n'
             result += player.__str__() + ': ' + pos.__str__()
 
         return result
