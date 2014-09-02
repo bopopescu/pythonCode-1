@@ -1,0 +1,142 @@
+body{
+	background-color:rgba(127,127,127,0.9);
+	font-family:monospace;
+}
+
+#all{
+	border:0px ridge red;
+	padding:0;	
+	margin-left:auto;
+	margin-right:auto;
+	width:1020px;
+}
+
+#header{
+	text-align:center;
+}
+
+h1{
+	text-align:center;
+	font-size:24px;
+}
+
+#buttonPanel{
+	text-align:center;
+}
+
+.panels{
+	float:left;
+	width:49%;
+	margin-left:3px;
+	margin-right:3px;
+}
+
+#logPanel{
+	font-size:14px;
+	height:100px;
+	text-align:left;
+	overflow:auto;
+}
+
+#chatPanel{
+	font-size:14px;
+	height:100px;
+	text-align:left;
+	overflow:auto;
+}
+
+#gamePanel{
+	clear:left;
+	display:none;
+}
+
+#gameTable{
+	/*background-image:url("../img/ecke.jpg");
+	background-repeat:repeat;
+	*/
+}
+#controlPanel{}
+
+#playerNames{
+	color:white;
+	font-size:26px;
+}
+
+#mapOverlay{
+	 background-image:url("../img/berg.jpg");
+}
+
+#cannonOverlay{
+	position: absolute; 
+	top: 0px; 
+	left: 0px;
+}
+
+#projektilOverlay{
+	position: absolute; 
+	top: 0px; 
+	left: 0px;
+}
+
+#footer{
+	color:white;
+	font-size:16px;
+}
+
+.noscriptError{
+	color:red;
+	background-color:yellow;
+	border:2px solid black;
+}
+
+.overlay{
+	 width:600px;
+	 height:400px;
+	 margin:0px;
+	 padding:0px;
+}
+
+.colMain{
+	vertical-align:top;
+	min-width:200px;
+}
+
+.top{
+	vertical-align:top;
+}
+
+.input{
+	width:4em;
+}
+
+.left{
+	text-align:left;
+}
+
+.right{
+	text-align:right;
+}
+
+.scala{
+	margin-top:5px;
+	margin-bottom:5px;
+}
+
+.logo{
+	width:100px;
+	height:50px;
+}
+
+
+fieldset { 
+	border: 1px solid white; 
+	font-weight:bold; 
+	color:white;
+	/*background-color:rgba(255,0,0,0.2);*/
+}
+
+
+ul{
+	margin:0px;
+	list-style-type:decimal;
+}

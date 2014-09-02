@@ -84,6 +84,8 @@ class GameSocketHandler(WebSocketsHandler):
             self.__socketMaintainer.playerWantToPlay(self.__socketID)
         elif keyword == Consts.FIRE:
             self.__receivedFireCommand(resultDict[Consts.ANGLE], resultDict[Consts.POWER])
+        elif keyword == Consts.MESSAGE:
+            self.__sendChatMessage(paramString)
         else:
             self.close()
             
@@ -184,6 +186,19 @@ class GameSocketHandler(WebSocketsHandler):
                 }
         
         return message % subst
+    
+    
+    def __sendChatMessage (self, jsonData):
+        '''
+        Function which sends a Chat Message to the other players
+        @param jsonData: the message with the JsonData
+        '''
+        
+        #Iterate over the existing players and send the message to the other players in the Match
+        for player in self.__match.players:
+            if player != self.__playerObject:
+                player.socket.send_message("%s:%s" % (Consts.MESSAGE, jsonData))
+    
     
     def __foundNextPlayer (self, currentPlayer):
         '''

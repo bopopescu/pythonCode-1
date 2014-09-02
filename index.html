@@ -1,0 +1,106 @@
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+	<link rel="stylesheet" type="text/css" href="css/map.css">
+	
+	<!-- muss als erstes eingebunden werden -->	
+	<!-- <script src="http://ajax.googleapis.com/ajax/libs/dojo/1.10.0/dojo/dojo.js" data-dojo-config="parseOnLoad: true, async: 1"></script> -->
+	<script src="http://ajax.googleapis.com/ajax/libs/dojo/1.7/dojo/dojo.js" data-dojo-config="parseOnLoad: true, async: 1"></script>
+	<script src="js/draw.js"></script>
+	<script src="js/game.js"></script>
+	
+	<noscript><h1 class="noscriptError">This game is completely based on JavaScript - you have to enable it before you can play TankCommander!!!</h1></noscript>
+	
+	<title>TankCommander</title>
+
+</head>
+
+<body onload="createOverlay();" onunload="cleanup();">
+	<div id="all">
+		<div id="header">
+			<div><h1>Welcome to TankCommander</h1></div>
+			<img src="img/tankLogoCannonLeft.png" class="logo"/>
+			<img src="img/tankLogoCannonRight.png" class="logo"/>
+		</div>
+		<div id="buttonPanel">
+			<input type="button" value="Start Game" onclick="startGame()" id="startButton">
+			<input type="button" value="View Highscores" onclick="showHighscoreList()" id="highscoreButton">
+			<input type="button" value="About" onclick="showAboutDialog()" id="aboutButton">
+		</div>
+		<div class="panels">
+			<fieldset>
+				<legend>Log-Window</legend>
+				<div id="logPanel">
+					<ul id="logList"></ul>
+				</div>
+			</fieldset>
+		</div>
+		<div class="panels">
+			<fieldset>
+				<legend>Chat-Window</legend>
+				<div id="chatPanel">
+					<ul id="chatList"></ul>
+				</div>		
+			</fieldset>
+		</div>
+		<div id="gamePanel">
+			<table id="gameTable">
+				<tr>
+					<th colspan="3" id="playerNames">Test</th>
+				</tr>
+				<tr>
+					<td class="colMain">
+						<fieldset id="controlPanel">
+							<legend>Controls</legend>
+							<table>
+								<tr>
+									<td><img src="img/scala.png" class="scala"/></td>										
+								</tr>							
+								<tr>
+									<th class="left">Angle (0° - 180°)</th>
+								</tr>
+								<tr>
+									<td><input type="number" step="1" min="0" max="180" value="90" onchange="setCannonAngle(this.value)" id="angle" class="input"></td>
+								</tr>
+								<tr>
+									<th class="left">Power (0 m/s - 1000 m/s)</th>
+								</tr>
+								<tr>
+									<td><input type="number" step="1" min="0" max="1000" value="0" id="power" class="input"></td>
+								</tr>
+								<tr>
+									<th class="right"><input type="button" value="FIRE" onclick="prepareShot()" id="fireButton" disabled="true" class="scala"></th>
+								</tr>
+							</table> 
+						</fieldset>
+						<fieldset id="chatPanel">
+							<legend>Chat</legend>
+							<table>
+								<tr>
+									<td><input type="text" value="Chat..." id="chatMessage" onClick="this.value=''"></td>
+								</tr>
+								<tr>
+									<td class="right"><input type="button" value="SEND MESSAGE" onclick="sendChatMessage()" id="chatButton" disabled="true" class="scala"></td>
+								</tr>
+							</table> 
+						</fieldset>						
+					</td>
+					<td style="position: relative;">						
+						<div id="mapOverlay" class="overlay"></div>
+						<div id="cannonOverlay" class="overlay"></div>
+						<div id="projektilOverlay" class="overlay"></div>
+						<div id="replaceableContent"></div>
+					</td>
+					<td class="colMain" id="opponentStatistics">
+						<!-- JS -->
+					</td>
+				</tr>
+				<tr>
+					<th id="footer" colspan="3">created by Markus Hinkelmann, Mike Feustel and Benno Schilling</th>
+				</tr>
+			</table>
+		</div>
+	</div>
+</body>
+</html>
