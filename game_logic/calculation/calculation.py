@@ -145,7 +145,8 @@ class Calculation:
         source_pos = source.getPosition()
         t = Consts.TIME_RESOLUTION
         point = self.__calc_pos(t, source_pos, angle, speed)
-        result.time_points.append(point)
+        # 1. Punkt nicht eintragen
+		# result.time_points.append(point)
 
         while self.__point_is_in_world(point) and not self.__is_horizon_hit(point):
                 t += Consts.TIME_RESOLUTION
@@ -153,7 +154,7 @@ class Calculation:
                 if point.y > result.max_y_point.y:
                     result.max_y_point = point
                 if point.y <= Consts.WORLD_HEIGHT+Consts.BULLET_RADIUS and \
-                    self.__is_out_of_radius(source_pos, point): # darf / muss drüber gehen
+                    self.__is_out_of_radius(source_pos, point): # darf / muss drüber gehen, fängt erst nach dem Player an
                     result.time_points.append(point)
 
         return result
